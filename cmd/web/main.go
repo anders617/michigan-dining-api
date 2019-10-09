@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 
-	pb "github.com/MichiganDiningAPi/api/proto"
+	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/google/logger"
 	"google.golang.org/grpc"
@@ -22,7 +22,6 @@ const (
 var wg sync.WaitGroup
 
 type server struct {
-	pb.UnimplementedMDiningServer
 }
 
 func (s *server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest) (*pb.DiningHallsReply, error) {
@@ -59,7 +58,6 @@ func serveHTTP() {
 
 func main() {
 	logger.Init("Web", true, true, ioutil.Discard)
-	defer logger.Close()
 	wg.Add(2)
 	go serveGRPC()
 	go serveHTTP()

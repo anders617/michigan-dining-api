@@ -22,3 +22,5 @@
 *fetch
 !*fetch/
 
+# Ignore bazel output directories
+bazel-*
