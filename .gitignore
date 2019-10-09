@@ -10,3 +10,15 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# VSCode
+.vscode/
+
+# Ignore files named web (exectuable), but not the web directory
+*web
+!*web/
+
+# Ignore files named fetch (exectuable), but not the fetch directory
+*fetch
+!*fetch/
+

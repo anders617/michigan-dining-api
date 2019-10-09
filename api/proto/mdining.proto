@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package mdining;
+
+service MDining {
+  rpc GetDiningHalls(DiningHallsRequest) returns (DiningHallsReply) {}
+}
+
+message DiningHallsRequest { string test = 1; }
+
+message DiningHallsReply { string test = 1; }
