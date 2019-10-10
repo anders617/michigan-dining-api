@@ -5,33 +5,37 @@ package mdining;
 import "google/api/annotations.proto";
 import "api/proto/dininghalls.proto";
 import "api/proto/items.proto";
+import "api/proto/filterableentries.proto";
 
 service MDining {
   rpc GetDiningHalls(DiningHallsRequest) returns (DiningHallsReply) {
     option (google.api.http) = {
-      get: "/v1/diningHalls"
+      get : "/v1/diningHalls"
     };
   }
 
   rpc GetItems(ItemsRequest) returns (ItemsReply) {
     option (google.api.http) = {
-      get: "/v1/items"
+      get : "/v1/items"
+    };
+  }
+
+  rpc GetFilterableEntries(FilterableEntriesRequest)
+      returns (FilterableEntriesReply) {
+    option (google.api.http) = {
+      get : "/v1/filterableEntries"
     };
   }
 }
 
-message DiningHallsRequest { 
-}
+message DiningHallsRequest {}
 
-message DiningHallsReply { 
-  DiningHalls diningHalls = 1;
-}
+message DiningHallsReply { DiningHalls diningHalls = 1; }
 
-message ItemsRequest {
-  string items = 1;
-}
+message ItemsRequest {}
 
-message ItemsReply {
-  Items items = 1;
-}
+message ItemsReply { Items items = 1; }
 
+message FilterableEntriesRequest {}
+
+message FilterableEntriesReply { FilterableEntries filterableEntries = 1; }

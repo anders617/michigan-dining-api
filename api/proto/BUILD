@@ -14,11 +14,18 @@ proto_library(
 )
 
 proto_library(
+    name = "filterable_entries_proto",
+    srcs = ["filterableentries.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
     name = "mdining_proto",
     srcs = ["mdining.proto"],
     visibility = ["//visibility:public"],
     deps = [
         ":dininghalls_proto",
+        ":filterable_entries_proto",
         ":items_proto",
         "@go_googleapis//google/api:annotations_proto",
     ],
@@ -31,7 +38,12 @@ go_proto_library(
         "@grpc_ecosystem_grpc_gateway//protoc-gen-grpc-gateway:go_gen_grpc_gateway",
     ],
     importpath = "github.com/MichiganDiningAPI/api/proto",
-    protos = [":mdining_proto", ":items_proto", ":dininghalls_proto"],
+    protos = [
+        ":dininghalls_proto",
+        ":filterable_entries_proto",
+        ":items_proto",
+        ":mdining_proto",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_golang_protobuf//descriptor:go_default_library",

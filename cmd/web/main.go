@@ -24,6 +24,7 @@ const (
 var wg sync.WaitGroup
 var mockDiningHalls pb.DiningHalls
 var mockItems pb.Items
+var mockFilterableEntries pb.FilterableEntries
 
 type server struct {
 }
@@ -43,6 +44,11 @@ func (s *server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest)
 func (s *server) GetItems(ctx context.Context, req *pb.ItemsRequest) (*pb.ItemsReply, error) {
 	glog.Infof("GetItems req{%v}", req)
 	return &pb.ItemsReply{Items: &mockItems}, nil
+}
+
+func (s *server) GetFilterableEntries(ctx context.Context, req *pb.FilterableEntriesRequest) (*pb.FilterableEntriesReply, error) {
+	glog.Infof("GetFilterableEntries req{%v}", req)
+	return &pb.FilterableEntriesReply{FilterableEntries: &mockFilterableEntries}, nil
 }
 
 //
@@ -100,6 +106,7 @@ func main() {
 
 	readProtoFromFile("cmd/web/dininghalls.proto.txt", &mockDiningHalls)
 	readProtoFromFile("cmd/web/items.proto.txt", &mockItems)
+	readProtoFromFile("cmd/web/filterableentries.proto.txt", &mockFilterableEntries)
 
 	go serveGRPC()
 	go serveHTTP()

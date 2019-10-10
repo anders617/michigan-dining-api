@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package mdining;
+
+message FilterableEntries {
+    repeated FilterableEntry filterableEntries = 1;
+}
+
+message FilterableEntry {
+    repeated string attributes = 1;
+    string date = 2;
+    string diningHallName = 3;
+    string itemName = 4;
+    repeated string mealNames = 5;
+}

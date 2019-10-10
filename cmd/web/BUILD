@@ -20,6 +20,7 @@ go_binary(
     data = [
         "dininghalls.proto.txt",
         "items.proto.txt",
+        "filterableentries.proto.txt",
     ],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
