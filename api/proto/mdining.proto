@@ -26,6 +26,12 @@ service MDining {
       get : "/v1/filterableEntries"
     };
   }
+
+  rpc GetAll(AllRequest) returns (AllReply) {
+    option (google.api.http) = {
+      get: "/v1/all"
+    };
+  }
 }
 
 message DiningHallsRequest {}
@@ -39,3 +45,11 @@ message ItemsReply { Items items = 1; }
 message FilterableEntriesRequest {}
 
 message FilterableEntriesReply { FilterableEntries filterableEntries = 1; }
+
+message AllRequest {}
+
+message AllReply {
+  DiningHalls diningHalls = 1;
+  Items items = 2;
+  FilterableEntries filterableEntries = 3;
+}

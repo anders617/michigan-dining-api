@@ -51,6 +51,11 @@ func (s *server) GetFilterableEntries(ctx context.Context, req *pb.FilterableEnt
 	return &pb.FilterableEntriesReply{FilterableEntries: &mockFilterableEntries}, nil
 }
 
+func (s *server) GetAll(ctx context.Context, req *pb.AllRequest) (*pb.AllReply, error) {
+	glog.Infof("GetAll req{%v}", req)
+	return &pb.AllReply{DiningHalls: &mockDiningHalls, Items: &mockItems, FilterableEntries: &mockFilterableEntries}, nil
+}
+
 //
 // Serves GRPC requests
 //
