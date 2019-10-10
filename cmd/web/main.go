@@ -84,8 +84,6 @@ func serveHTTP() {
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	http.ListenAndServe(":8081", mux)
-
-	wg.Done()
 }
 
 func readProtoFromFile(path string, p proto.Message) {
