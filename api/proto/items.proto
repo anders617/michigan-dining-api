@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package mdining;
+
+message Items {
+    map<string, Item> items = 1;
+}
+
+message Item {
+    string name = 1;
+    repeated string attributes = 2;
+    map<string, DiningHallMatch> diningHallMatches = 3;
+    repeated DiningHallMatch diningHallMatchesArray = 4;
+    message DiningHallMatch {
+        string name = 1;
+        map<string, MealTime> mealTimes = 2;
+        repeated MealTime mealTimesArray = 3;
+        message MealTime {
+            string date = 1;
+            string formattedDate = 2;
+            repeated string mealNames = 3;
+        }
+    }
+}

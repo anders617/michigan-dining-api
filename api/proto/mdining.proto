@@ -3,11 +3,19 @@ syntax = "proto3";
 package mdining;
 
 import "google/api/annotations.proto";
+import "api/proto/dininghalls.proto";
+import "api/proto/items.proto";
 
 service MDining {
   rpc GetDiningHalls(DiningHallsRequest) returns (DiningHallsReply) {
     option (google.api.http) = {
       get: "/v1/diningHalls"
+    };
+  }
+
+  rpc GetItems(ItemsRequest) returns (ItemsReply) {
+    option (google.api.http) = {
+      get: "/v1/items"
     };
   }
 }
@@ -19,53 +27,11 @@ message DiningHallsReply {
   DiningHalls diningHalls = 1;
 }
 
-message DiningHalls {
-  repeated DiningHall diningHalls = 1;
+message ItemsRequest {
+  string items = 1;
 }
 
-message DiningHall {
-  string name = 1;
-  string campus = 2;
-  Building building = 3;
-  string type = 4;
-  Capacity capacity = 5;
-  uint32 sortPosition = 6;
-  repeated DayHour dayHours = 7;
-  repeated DayEvent dayEvents = 8;
-
-  message Building {
-    string name = 1;
-    Address address = 2;
-
-    message Address {
-      string city = 1;
-      uint32 postalCode = 2;
-      string state = 3;
-      string street1 = 4;
-      string street2 = 5;
-    }
-  }
-  message Capacity {
-    uint32 currentOccupancy = 1;
-    uint32 currentOccupancyRatio = 2;
-    uint32 totalCapacity = 3;
-  }
-  message DayHour {
-    string key = 1;
-    repeated string hour = 2;
-  }
-  message DayEvent {
-    string key = 1;
-    repeated CalendarEvent calendarEvent = 2;
-
-    message CalendarEvent {
-      string eventDayEnd = 1;
-      string eventDayStart = 2;
-      string eventDescription = 3;
-      string eventMapLink = 4;
-      string eventTimeStart = 5;
-      string eventTimeEnd = 6;
-      string eventTitle = 7;
-    }
-  }
+message ItemsReply {
+  Items items = 1;
 }
+

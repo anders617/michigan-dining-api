@@ -23,6 +23,7 @@ const (
 
 var wg sync.WaitGroup
 var mockDiningHalls pb.DiningHalls
+var mockItems pb.Items
 
 type server struct {
 }
@@ -37,6 +38,14 @@ func (s *server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest)
 }
 
 //
+// Handler for GetItems request
+//
+func (s *server) GetItems(ctx context.Context, req *pb.ItemsRequest) (*pb.ItemsReply, error) {
+	glog.Infof("GetItems req{%v}", req)
+	return &pb.ItemsReply{Items: &mockItems}, nil
+}
+
+//
 // Serves GRPC requests
 //
 func serveGRPC() {
@@ -46,7 +55,10 @@ func serveGRPC() {
 		glog.Fatalf("Failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
+
+	// Register Server
 	pb.RegisterMDiningServer(s, &server{})
+
 	if err := s.Serve(lis); err != nil {
 		glog.Fatalf("failed to server: %v", err)
 	}
@@ -76,14 +88,21 @@ func serveHTTP() {
 	wg.Done()
 }
 
-func main() {
-	flag.Parse()
-	wg.Add(2)
-	data, err := ioutil.ReadFile("cmd/web/dininghalls.proto.txt")
+func readProtoFromFile(path string, p proto.Message) {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		glog.Fatalf("Failed to read in dininghalls text proto, %v", err)
 	}
-	proto.UnmarshalText(string(data), &mockDiningHalls)
+	proto.UnmarshalText(string(data), p)
+}
+
+func main() {
+	flag.Parse()
+	wg.Add(2)
+
+	readProtoFromFile("cmd/web/dininghalls.proto.txt", &mockDiningHalls)
+	readProtoFromFile("cmd/web/items.proto.txt", &mockItems)
+
 	go serveGRPC()
 	go serveHTTP()
 	wg.Wait()

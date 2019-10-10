@@ -3,15 +3,15 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Download the Go rules
 http_archive(
     name = "io_bazel_rules_go",
+    sha256 = "513c12397db1bc9aa46dd62f02dd94b49a9b5d17444d49b5a04c5a89f3053c1c",
     urls = [
         "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.19.5/rules_go-v0.19.5.tar.gz",
         "https://github.com/bazelbuild/rules_go/releases/download/v0.19.5/rules_go-v0.19.5.tar.gz",
     ],
-    sha256 = "513c12397db1bc9aa46dd62f02dd94b49a9b5d17444d49b5a04c5a89f3053c1c",
 )
 
 # Load and call the dependencies
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
 
@@ -19,11 +19,11 @@ go_register_toolchains()
 
 http_archive(
     name = "bazel_gazelle",
+    sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
     urls = [
         "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz",
         "https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz",
     ],
-    sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
 )
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
@@ -48,17 +48,17 @@ protobuf_deps()
 
 git_repository(
     name = "com_googleapis_googleapis",
-    remote = "https://github.com/googleapis/googleapis",
     commit = "fcbb13c4f84380c6546a1c78e44b241c3c8c13f4",
+    remote = "https://github.com/googleapis/googleapis",
 )
 
 load("@com_googleapis_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 
 switched_rules_by_language(
     name = "com_google_googleapis_imports",
-    grpc = True,
     gapic = True,
     go = True,
+    grpc = True,
     java = False,
 )
 
@@ -70,13 +70,20 @@ http_archive(
     urls = ["https://github.com/googleapis/gapic-generator/archive/5aa30f3d6850c8ebc1092d17ef471aea27a81242.zip"],
 )
 
+# bazelbuild buildtools for formatting build files
+http_archive(
+    name = "com_github_bazelbuild_buildtools",
+    strip_prefix = "buildtools-master",
+    url = "https://github.com/bazelbuild/buildtools/archive/master.zip",
+)
+
 # Include for grpc gateway bazel rules
 
 http_archive(
     name = "build_stack_rules_proto",
-    urls = ["https://github.com/stackb/rules_proto/archive/b93b544f851fdcd3fc5c3d47aee3b7ca158a8841.tar.gz"],
     sha256 = "c62f0b442e82a6152fcd5b1c0b7c4028233a9e314078952b6b04253421d56d61",
     strip_prefix = "rules_proto-b93b544f851fdcd3fc5c3d47aee3b7ca158a8841",
+    urls = ["https://github.com/stackb/rules_proto/archive/b93b544f851fdcd3fc5c3d47aee3b7ca158a8841.tar.gz"],
 )
 
 # External Go Depndencies
