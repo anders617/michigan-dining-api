@@ -44,6 +44,41 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
+# Google API Library
+
+git_repository(
+    name = "com_googleapis_googleapis",
+    remote = "https://github.com/googleapis/googleapis",
+    commit = "fcbb13c4f84380c6546a1c78e44b241c3c8c13f4",
+)
+
+load("@com_googleapis_googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+    grpc = True,
+    gapic = True,
+    go = True,
+    java = False,
+)
+
+# Note gapic-generator contains java-specific and common code, that is why it is imported in common
+# section
+http_archive(
+    name = "com_google_api_codegen",
+    strip_prefix = "gapic-generator-5aa30f3d6850c8ebc1092d17ef471aea27a81242",
+    urls = ["https://github.com/googleapis/gapic-generator/archive/5aa30f3d6850c8ebc1092d17ef471aea27a81242.zip"],
+)
+
+# Include for grpc gateway bazel rules
+
+http_archive(
+    name = "build_stack_rules_proto",
+    urls = ["https://github.com/stackb/rules_proto/archive/b93b544f851fdcd3fc5c3d47aee3b7ca158a8841.tar.gz"],
+    sha256 = "c62f0b442e82a6152fcd5b1c0b7c4028233a9e314078952b6b04253421d56d61",
+    strip_prefix = "rules_proto-b93b544f851fdcd3fc5c3d47aee3b7ca158a8841",
+)
+
 # External Go Depndencies
 
 go_repository(
@@ -54,10 +89,10 @@ go_repository(
 )
 
 go_repository(
-    name = "com_github_google_logger",
-    importpath = "github.com/google/logger",
-    sum = "h1:Jtq7/44yDwUXMaLTYgXFC31zpm6Oku7OI/k4//yVANQ=",
-    version = "v1.0.1",
+    name = "com_github_golang_glog",
+    importpath = "github.com/golang/glog",
+    sum = "h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=",
+    version = "v0.0.0-20160126235308-23def4e6c14b",
 )
 
 go_repository(
@@ -80,4 +115,22 @@ go_repository(
     importpath = "golang.org/x/text",
     sum = "h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=",
     version = "v0.3.0",
+)
+
+go_repository(
+    name = "grpc_ecosystem_grpc_gateway",
+    importpath = "github.com/grpc-ecosystem/grpc-gateway",
+    sum = "h1:h8+NsYENhxNTuq+dobk3+ODoJtwY4Fu0WQXsxJfL8aM=",
+    version = "v1.11.3",
+)
+
+load("@grpc_ecosystem_grpc_gateway//:repositories.bzl", "go_repositories")
+
+go_repositories()
+
+go_repository(
+    name = "org_golang_google_genproto",
+    importpath = "google.golang.org/genproto",
+    sum = "h1:4HYDjxeNXAOTv3o1N2tjo8UUSlhQgAD52FVkwxnWgM8=",
+    version = "v0.0.0-20191009194640-548a555dbc03",
 )

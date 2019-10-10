@@ -8,8 +8,10 @@ go_library(
     deps = [
         "//api/proto:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library_gen",
-        "@com_github_google_logger//:go_default_library",
+        "@com_github_golang_glog//:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
+        "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
 
@@ -17,4 +19,5 @@ go_binary(
     name = "web",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
+    data = ["dininghalls.proto.txt"],
 )
