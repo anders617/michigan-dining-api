@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	pb "github.com/MichiganDiningAPI/api/proto"
+	"github.com/MichiganDiningAPI/util/io"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -97,21 +98,13 @@ func serveHTTP() {
 	http.ListenAndServe(":8081", mux)
 }
 
-func readProtoFromFile(path string, p proto.Message) {
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		glog.Fatalf("Failed to read in dininghalls text proto, %v", err)
-	}
-	proto.UnmarshalText(string(data), p)
-}
-
 func main() {
 	flag.Parse()
 	wg.Add(2)
 
-	readProtoFromFile("cmd/web/dininghalls.proto.txt", &mockDiningHalls)
-	readProtoFromFile("cmd/web/items.proto.txt", &mockItems)
-	readProtoFromFile("cmd/web/filterableentries.proto.txt", &mockFilterableEntries)
+	util.ReadProtoFromFile("api/proto/sample/dininghalls.proto.txt", &mockDiningHalls)
+	util.ReadProtoFromFile("api/proto/sample/items.proto.txt", &mockItems)
+	util.ReadProtoFromFile("api/proto/sample/filterableentries.proto.txt", &mockFilterableEntries)
 
 	go serveGRPC()
 	go serveHTTP()
