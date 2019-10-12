@@ -22,9 +22,9 @@ var (
 	TableNames = []string{
 		DiningHallsTableName,
 		ItemsTableName}
-	TableKeys = []string{
-		"name",
-		"name"}
+	TableKeys = map[string]string{
+		DiningHallsTableName: "name",
+		ItemsTableName:       "name"}
 )
 
 type DynamoClient struct {
@@ -62,17 +62,40 @@ func (d *DynamoClient) createTable(table string, key string) {
 
 func (d *DynamoClient) CreateTables() error {
 	glog.Info("Checking for existence of dynamodb tables...")
-	for i, table := range TableNames {
+	for _, table := range TableNames {
 		describeReq := d.client.DescribeTableRequest(&dynamodb.DescribeTableInput{TableName: aws.String(table)})
 		_, err := describeReq.Send(context.Background())
 		if err != nil {
 			glog.Infof("Table %s does not exist. Creating now...", table)
-			d.createTable(table, TableKeys[i])
+			d.createTable(table, TableKeys[table])
 			glog.Infof("Created table %s.", table)
 		} else {
 			glog.Infof("Table %s exists.", table)
 		}
 	}
+	return nil
+}
+
+func (d *DynamoClient) GetProto(table string, key string, p proto.Message) error {
+	keyAttr, keyErr := dynamodbattribute.Marshal(&key)
+	if keyErr != nil {
+		glog.Errorf("Error marshalling key to attribute: %s", keyErr)
+		return keyErr
+	}
+	req := d.client.GetItemRequest(&dynamodb.GetItemInput{
+		TableName: &table,
+		Key:       map[string]dynamodb.AttributeValue{TableKeys[table]: *keyAttr}})
+	res, err := req.Send(context.Background())
+	if err != nil {
+		glog.Errorf("Error sending get request for %s %s", reflect.TypeOf(p), err)
+		return err
+	}
+	err = dynamodbattribute.UnmarshalMap(res.Item, p)
+	if err != nil {
+		glog.Errorf("Error unmarshalling response into %s %s", reflect.TypeOf(p), err)
+		return err
+	}
+	glog.Info("Succesfully Got %s", reflect.TypeOf(p))
 	return nil
 }
 

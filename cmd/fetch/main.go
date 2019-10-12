@@ -5,7 +5,7 @@ import (
 
 	pb "github.com/MichiganDiningAPI/api/proto"
 	dc "github.com/MichiganDiningAPI/cmd/fetch/dynamoclient"
-	"github.com/MichiganDiningAPI/util"
+	"github.com/MichiganDiningAPI/util/io"
 	"github.com/golang/glog"
 )
 
@@ -28,4 +28,7 @@ func main() {
 		glog.Fatalf("Failed to find item in map")
 	}
 	dynamoclient.PutProto(&dc.ItemsTableName, tendies)
+	var item pb.Item
+	dynamoclient.GetProto(dc.ItemsTableName, tendies.Name, &item)
+	glog.Infof("Result of Get: %v", item)
 }
