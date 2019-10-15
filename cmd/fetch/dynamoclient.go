@@ -95,7 +95,7 @@ func (d *DynamoClient) GetProto(table string, key string, p proto.Message) error
 		glog.Errorf("Error unmarshalling response into %s %s", reflect.TypeOf(p), err)
 		return err
 	}
-	glog.Info("Succesfully Got %s", reflect.TypeOf(p))
+	glog.Infof("Succesfully Got %s", reflect.TypeOf(p))
 	return nil
 }
 

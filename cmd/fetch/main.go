@@ -2,15 +2,19 @@ package main
 
 import (
 	"flag"
+	"sync"
 
 	pb "github.com/MichiganDiningAPI/api/proto"
 	dc "github.com/MichiganDiningAPI/cmd/fetch/dynamoclient"
+	mc "github.com/MichiganDiningAPI/cmd/fetch/mdiningclient"
 	"github.com/MichiganDiningAPI/util/io"
 	"github.com/golang/glog"
 )
 
 func main() {
 	flag.Parse()
+
+	mdining := mc.New()
 
 	dynamoclient := dc.New()
 	dynamoclient.CreateTables()
@@ -31,4 +35,27 @@ func main() {
 	var item pb.Item
 	dynamoclient.GetProto(dc.ItemsTableName, tendies.Name, &item)
 	glog.Infof("Result of Get: %v", item)
+
+
+	dh, e := mdining.GetDiningHallList()
+	if e != nil {
+		glog.Fatalf("Failed to get dining hall list %s", e)
+	}
+	wg := sync.WaitGroup{}
+	for _, dininghall := range dh.DiningHalls {
+		reply, err := mdining.GetMenuBase(dininghall)
+		if err != nil {
+			continue
+		}
+		wg.Add(1)
+		go func() {
+			for _, menuBase := range reply.Menu {
+				r, _ := mdining.GetMenuDetails(dininghall, menuBase)
+				glog.Infof("%v", r)
+			}
+			wg.Done()
+		}()
+		//dynamoclient.PutProto(&dc.DiningHallsTableName, dininghall)
+	}
+	wg.Wait()
 }
