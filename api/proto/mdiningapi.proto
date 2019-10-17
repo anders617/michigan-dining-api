@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package mdiningapi;
+
+import "api/proto/dininghalls.proto";
+import "api/proto/items.proto";
+import "api/proto/filterableentries.proto";
+import "api/proto/menu.proto";
+
+message GetDiningHallsReply {
+    repeated DiningHallGroup diningHallGroup = 1;
+}
+
+message DiningHallGroup {
+    string name = 1;
+    repeated mdining.DiningHall diningHall = 2;
+}
+
+message GetMenuBaseReply {
+    repeated MenuBase menu = 1;
+}
+
+message MenuBase {
+    string name = 1;
+    string date = 2;
+    string description = 3;
+    string formattedDate = 4;
+    int32 ratingCount = 5;
+    int32 ratingScore = 6;
+    bool hasCategories = 7;
+}
+
+message GetMenuDetailsReply {
+    repeated MenuDetail menu = 1;
+}
+
+message MenuDetail {
+    string name = 1;
+    string date = 2;
+    string formattedDate = 3;
+    int32 ratingCount = 4;
+    int32 ratingScore = 5;
+    bool hasCategories = 6;
+    string description = 7;
+    repeated mdining.Category category = 8;
+}

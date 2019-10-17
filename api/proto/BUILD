@@ -20,6 +20,21 @@ proto_library(
 )
 
 proto_library(
+    name = "menu_proto",
+    srcs = ["menu.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "food_proto",
+    srcs = ["food.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":menu_proto"
+    ]
+)
+
+proto_library(
     name = "mdining_proto",
     srcs = ["mdining.proto"],
     visibility = ["//visibility:public"],
@@ -27,6 +42,7 @@ proto_library(
         ":dininghalls_proto",
         ":filterable_entries_proto",
         ":items_proto",
+        ":menu_proto",
         "@go_googleapis//google/api:annotations_proto",
     ],
 )
@@ -39,6 +55,8 @@ proto_library(
         ":dininghalls_proto",
         ":filterable_entries_proto",
         ":items_proto",
+        ":menu_proto",
+        ":food_proto",
     ],
 )
 
@@ -78,7 +96,9 @@ go_proto_library(
         ":dininghalls_proto",
         ":filterable_entries_proto",
         ":items_proto",
-        ":mdining_proto"
+        ":mdining_proto",
+        ":menu_proto",
+        ":food_proto",
     ],
     visibility = ["//visibility:public"],
     deps = [

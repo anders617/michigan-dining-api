@@ -2,7 +2,9 @@ package dynamoclient
 
 import (
 	"context"
+	"math"
 	"reflect"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
@@ -16,15 +18,69 @@ import (
 var (
 	DiningHallsTableName = "DiningHalls"
 	ItemsTableName       = "Items"
+	MenuTableName        = "Menus"
+	FoodTableName        = "Foods"
+)
+
+var (
+	NameKey               = "name"
+	DiningHallDateMealKey = "key"
+	DateKey               = "date"
+	NameDateKey           = "key"
 )
 
 var (
 	TableNames = []string{
 		DiningHallsTableName,
-		ItemsTableName}
-	TableKeys = map[string]string{
-		DiningHallsTableName: "name",
-		ItemsTableName:       "name"}
+		ItemsTableName,
+		MenuTableName,
+		FoodTableName}
+	TableKeys = map[string][]dynamodb.KeySchemaElement{
+		DiningHallsTableName: []dynamodb.KeySchemaElement{
+			dynamodb.KeySchemaElement{
+				AttributeName: &NameKey,
+				KeyType:       "HASH"}},
+		ItemsTableName: []dynamodb.KeySchemaElement{
+			dynamodb.KeySchemaElement{
+				AttributeName: &NameKey,
+				KeyType:       "HASH"}},
+		MenuTableName: []dynamodb.KeySchemaElement{
+			dynamodb.KeySchemaElement{
+				AttributeName: &DiningHallDateMealKey,
+				KeyType:       "HASH"},
+			dynamodb.KeySchemaElement{
+				AttributeName: &DateKey,
+				KeyType:       "RANGE"}},
+		FoodTableName: []dynamodb.KeySchemaElement{
+			dynamodb.KeySchemaElement{
+				AttributeName: &NameDateKey,
+				KeyType:       "HASH"},
+			dynamodb.KeySchemaElement{
+				AttributeName: &DateKey,
+				KeyType:       "RANGE"}}}
+	TableAttributes = map[string][]dynamodb.AttributeDefinition{
+		DiningHallsTableName: []dynamodb.AttributeDefinition{
+			dynamodb.AttributeDefinition{
+				AttributeName: &NameKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS}},
+		ItemsTableName: []dynamodb.AttributeDefinition{
+			dynamodb.AttributeDefinition{
+				AttributeName: &NameKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS}},
+		MenuTableName: []dynamodb.AttributeDefinition{
+			dynamodb.AttributeDefinition{
+				AttributeName: &DiningHallDateMealKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS},
+			dynamodb.AttributeDefinition{
+				AttributeName: &DateKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS}},
+		FoodTableName: []dynamodb.AttributeDefinition{
+			dynamodb.AttributeDefinition{
+				AttributeName: &NameDateKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS},
+			dynamodb.AttributeDefinition{
+				AttributeName: &DateKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS}}}
 )
 
 type DynamoClient struct {
@@ -46,12 +102,14 @@ func New() *DynamoClient {
 	return dc
 }
 
-func (d *DynamoClient) createTable(table string, key string) {
+func (d *DynamoClient) createTable(table string) {
 	read, write := int64(5), int64(5)
+	keys, _ := TableKeys[table]
+	attrs, _ := TableAttributes[table]
 	createReq := d.client.CreateTableRequest(&dynamodb.CreateTableInput{
 		TableName:             &table,
-		KeySchema:             []dynamodb.KeySchemaElement{dynamodb.KeySchemaElement{AttributeName: &key, KeyType: "HASH"}},
-		AttributeDefinitions:  []dynamodb.AttributeDefinition{dynamodb.AttributeDefinition{AttributeName: &key, AttributeType: dynamodb.ScalarAttributeTypeS}},
+		KeySchema:             keys,
+		AttributeDefinitions:  attrs,
 		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{ReadCapacityUnits: &read, WriteCapacityUnits: &write}})
 	_, err := createReq.Send(context.Background())
 	if err != nil {
@@ -67,7 +125,7 @@ func (d *DynamoClient) CreateTables() error {
 		_, err := describeReq.Send(context.Background())
 		if err != nil {
 			glog.Infof("Table %s does not exist. Creating now...", table)
-			d.createTable(table, TableKeys[table])
+			d.createTable(table)
 			glog.Infof("Created table %s.", table)
 		} else {
 			glog.Infof("Table %s exists.", table)
@@ -76,15 +134,21 @@ func (d *DynamoClient) CreateTables() error {
 	return nil
 }
 
-func (d *DynamoClient) GetProto(table string, key string, p proto.Message) error {
-	keyAttr, keyErr := dynamodbattribute.Marshal(&key)
+func (d *DynamoClient) GetProto(table string, keys map[string]string, p proto.Message) error {
+	dynamoKeys := make(map[string]dynamodb.AttributeValue)
+	var keyErr error
+	var k *dynamodb.AttributeValue
+	for keyName, key := range keys {
+		k, keyErr = dynamodbattribute.Marshal(&key)
+		dynamoKeys[keyName] = *k
+	}
 	if keyErr != nil {
 		glog.Errorf("Error marshalling key to attribute: %s", keyErr)
 		return keyErr
 	}
 	req := d.client.GetItemRequest(&dynamodb.GetItemInput{
 		TableName: &table,
-		Key:       map[string]dynamodb.AttributeValue{TableKeys[table]: *keyAttr}})
+		Key:       dynamoKeys})
 	res, err := req.Send(context.Background())
 	if err != nil {
 		glog.Errorf("Error sending get request for %s %s", reflect.TypeOf(p), err)
@@ -96,6 +160,42 @@ func (d *DynamoClient) GetProto(table string, key string, p proto.Message) error
 		return err
 	}
 	glog.Infof("Succesfully Got %s", reflect.TypeOf(p))
+	return nil
+}
+
+func (d *DynamoClient) PutProtoBatch(table *string, protos []proto.Message) error {
+	reqs := make([]dynamodb.WriteRequest, 0)
+	for _, p := range protos {
+		av, err := dynamodbattribute.MarshalMap(&p)
+		if err != nil {
+			return err
+		}
+		reqs = append(reqs, dynamodb.WriteRequest{PutRequest: &dynamodb.PutRequest{Item: av}})
+	}
+	numBatches := int(math.Ceil(float64(len(reqs)) / 25.0))
+	currentBatch := 0
+	for len(reqs) > 0 {
+		// Take last 25 reqs (or all if <25 left)
+		// Dynamo db restricts batch calls to 25 or fewer items
+		startIdx := len(reqs) - 25
+		if startIdx < 0 {
+			startIdx = 0
+		}
+		req := d.client.BatchWriteItemRequest(&dynamodb.BatchWriteItemInput{
+			RequestItems: map[string][]dynamodb.WriteRequest{
+				*table: reqs[startIdx:]}})
+		_, err := req.Send(context.Background())
+		if err != nil {
+			glog.Errorf("Error batch putting items %s", err)
+			glog.Errorf("Retrying...")
+			time.Sleep(time.Second)
+			continue
+		}
+		reqs = reqs[:startIdx]
+		glog.Infof("Batch Put %s (%d/%d): %d Items Remaining", reflect.TypeOf(protos), currentBatch, numBatches, len(reqs))
+		currentBatch += 1
+	}
+	glog.Infof("Successful Batch Put %s", reflect.TypeOf(protos))
 	return nil
 }
 

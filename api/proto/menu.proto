@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package mdining;
+
+message Menu {
+    string meal = 1;
+    string date = 2;
+    string formattedDate = 3;
+    int32 ratingCount = 4;
+    int32 ratingScore = 5;
+    bool hasCategories = 6;
+    string description = 7;
+    repeated Category category = 8;
+    string diningHallName = 9;
+    string key = 10;
+}
+
+message Category {
+    string name = 1;
+    repeated MenuItem menuItem = 2;
+}
+
+message MenuItem {
+    string name = 1;
+    repeated string attribute = 2;
+    int32 ratingCount = 3;
+    int32 ratingScore = 4;
+    repeated string allergens = 5;
+    repeated ItemSizes itemSizes = 6;
+}
+
+message ItemSizes {
+    int32 portionSize = 1;
+    string servingSize = 2;
+    repeated NutritionalInfo nutritionalInfo = 3;
+}
+
+message NutritionalInfo {
+    string name = 1;
+    int32 value = 2;
+    string units = 3;
+    int32 percentDailyValue = 4;
+    string type = 5;
+}

@@ -1,9 +1,10 @@
 package mdiningclient
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/url"
-	"time"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/jsonpb"
@@ -46,25 +47,61 @@ func (m *MDiningClient) getPB(url string, reply proto.Message) error {
 		return err
 	}
 	defer res.Body.Close()
+	b, err1 := ioutil.ReadAll(res.Body)
+	if err1 != nil {
+		return err1
+	}
+	s := string(b)
 	um := jsonpb.Unmarshaler{AllowUnknownFields: true}
-	um.Unmarshal(res.Body, reply)
+	// um.Unmarshal(res.Body, reply)
+	// Sometimes mdining returns empty string instead of 0
+	// This messes with jsonpb unmarshalling since it expects an int
+	strings.ReplaceAll(s, "portionSize\":\"\"", "portionSize\":0")
+	strings.ReplaceAll(s, "postalCode\":\"\"", "postalCode\":0")
+	err = um.Unmarshal(strings.NewReader(s), reply)
 	if err != nil {
-		glog.Error("Error unmarshalling json: %s", err)
+		glog.Errorf("Error unmarshalling json: %s", err)
+		// glog.Errorf("Partial Unmartial: %v", reply)
 		return err
 	}
 	return nil
 }
 
-func (m *MDiningClient) GetMenuDetails(diningHall *pb.DiningHall, base *mdiningapi.MenuBase) (*mdiningapi.GetMenuDetailsReply, error) {
-	date, _ := time.Parse(time.RFC3339, base.Date)
+func (m *MDiningClient) GetMenus(diningHall *pb.DiningHall) (*[]*pb.Menu, error) {
+	reply, err := m.GetMenuDetails(diningHall)
+	if err != nil {
+		return nil, err
+	}
+	menus := make([]*pb.Menu, 0)
+	for _, m := range reply.Menu {
+		if m == nil {
+			// TODO: Why nil?
+			continue
+		}
+		menu := pb.Menu{
+			Key:            diningHall.Name + m.Date + m.Name,
+			Meal:           m.Name,
+			Date:           m.Date,
+			FormattedDate:  m.FormattedDate,
+			RatingCount:    m.RatingCount,
+			RatingScore:    m.RatingScore,
+			HasCategories:  m.HasCategories,
+			Description:    m.Description,
+			Category:       m.Category,
+			DiningHallName: diningHall.Name}
+		menus = append(menus, &menu)
+	}
+	return &menus, nil
+}
+
+func (m *MDiningClient) GetMenuDetails(diningHall *pb.DiningHall) (*mdiningapi.GetMenuDetailsReply, error) {
 	params := make(url.Values)
 	params.Add("_type", "json")
 	params.Add("diningHall", diningHall.Name)
-	params.Add("menu", base.Name)
-	params.Add("date", date.Format("02-01-06"))
 	url := DiningHallMenuDetailsBaseUrl
 	url.RawQuery = params.Encode()
 	reply := mdiningapi.GetMenuDetailsReply{}
+	glog.Infof("GetMenuDetails %s %s", diningHall.Name, url)
 	err := m.getPB(url.String(), &reply)
 	if err != nil {
 		return nil, err
@@ -79,6 +116,7 @@ func (m *MDiningClient) GetMenuBase(diningHall *pb.DiningHall) (*mdiningapi.GetM
 	url := DiningHallMenuBaseUrl
 	url.RawQuery = params.Encode()
 	reply := mdiningapi.GetMenuBaseReply{}
+	glog.Infof("GetMenuBase %s %s", diningHall.Name, url)
 	err := m.getPB(url.String(), &reply)
 	if err != nil {
 		return nil, err
@@ -92,9 +130,10 @@ func (m *MDiningClient) GetDiningHallList() (*pb.DiningHalls, error) {
 	url := DiningHallListUrl
 	url.RawQuery = params.Encode()
 	reply := mdiningapi.GetDiningHallsReply{}
+	glog.Infof("GetDiningHallList %s", url)
 	err := m.getPB(url.String(), &reply)
 	if err != nil {
-		return nil, err
+		// return nil, err
 	}
 	diningHalls := pb.DiningHalls{}
 	for _, group := range reply.DiningHallGroup {
