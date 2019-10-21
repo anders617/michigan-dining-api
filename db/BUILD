@@ -7,6 +7,7 @@ go_library(
         "createtables.go",
         "tableschemas.go",
         "deletetables.go",
+        "queries.go"
     ],
     importpath = "github.com/MichiganDiningAPI/db/dynamoclient",
     visibility = ["//visibility:public"],

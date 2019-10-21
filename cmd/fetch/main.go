@@ -24,6 +24,8 @@ func main() {
 	if e != nil {
 		glog.Fatalf("Failed to get dining hall list %s", e)
 	}
+	dynamoclient.PutProtoBatch(&dc.DiningHallsTableName, 
+		util.AsSliceType(dh.DiningHalls, []proto.Message{}).([]proto.Message))
 	menus, err := mdining.GetAllMenus(dh)
 	menusProtoSlice := util.AsSliceType(menus, []proto.Message{}).([]proto.Message)
 	if err != nil {

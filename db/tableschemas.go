@@ -16,6 +16,7 @@ var (
 	DiningHallDateMealKey = "key"
 	DateKey               = "date"
 	NameDateKey           = "key"
+	FoodTableNameKey      = "key"
 )
 
 var (
@@ -42,7 +43,7 @@ var (
 				KeyType:       "RANGE"}},
 		FoodTableName: []dynamodb.KeySchemaElement{
 			dynamodb.KeySchemaElement{
-				AttributeName: &NameDateKey,
+				AttributeName: &FoodTableNameKey,
 				KeyType:       "HASH"},
 			dynamodb.KeySchemaElement{
 				AttributeName: &DateKey,
@@ -65,7 +66,7 @@ var (
 				AttributeType: dynamodb.ScalarAttributeTypeS}},
 		FoodTableName: []dynamodb.AttributeDefinition{
 			dynamodb.AttributeDefinition{
-				AttributeName: &NameDateKey,
+				AttributeName: &FoodTableNameKey,
 				AttributeType: dynamodb.ScalarAttributeTypeS},
 			dynamodb.AttributeDefinition{
 				AttributeName: &DateKey,

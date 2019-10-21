@@ -36,6 +36,8 @@ func AsSliceType(s interface{}, outSlice interface{}) interface{} {
 			// If out elem type is Interface and in elem type is ptr
 			// then no need to call .Elem() on inV since interfaces are ptrs to values
 			out = reflect.Append(out, inV.Index(idx))
+		} else if outElemT.Kind() == reflect.Interface && inElemT.Kind() == reflect.Struct {
+			out = reflect.Append(out, inV.Index(idx))
 		} else {
 			out = reflect.Append(out, inV.Index(idx).Elem())
 		}

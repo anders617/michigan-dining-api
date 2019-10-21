@@ -1,6 +1,8 @@
 package mdiningprocessing
 
 import (
+	"strings"
+	
 	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/util/containers"
 	"github.com/golang/glog"
@@ -28,7 +30,7 @@ func MenusToFoods(menus *[]proto.Message) ([]proto.Message, error) {
 				food, exists := foods[menuItem.Name]
 				if !exists {
 					foods[menuItem.Name] = &pb.Food{
-						Key:             menuItem.Name + m.Date,
+						Key: strings.ToLower(menuItem.Name),
 						Date:            m.Date,
 						Name:            menuItem.Name,
 						Category:        cat.Name,
