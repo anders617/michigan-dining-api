@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/jsonpb"
@@ -67,14 +68,28 @@ func (m *MDiningClient) getPB(url string, reply proto.Message) error {
 }
 
 func (m *MDiningClient) GetAllMenus(diningHalls *pb.DiningHalls) (*[]*pb.Menu, error) {
+	var wg sync.WaitGroup
+	diningHallMenus := make([]*[]*pb.Menu, len(diningHalls.DiningHalls))
+	for idx, diningHall := range diningHalls.DiningHalls {
+		wg.Add(1)
+		go func(idx int, diningHall *pb.DiningHall) {
+			defer wg.Done()
+			menu, err := m.GetMenus(diningHall)
+			if err != nil {
+				glog.Warningf("Error getting %s menus", diningHall.Name)
+				diningHallMenus[idx] = nil
+				return
+			}
+			diningHallMenus[idx] = menu
+		}(idx, diningHall)
+	}
+	wg.Wait()
 	menus := make([]*pb.Menu, 0)
-	for _, diningHall := range diningHalls.DiningHalls {
-		diningHallMenus, err := m.GetMenus(diningHall)
-		if err != nil {
-			glog.Warningf("Error getting %s menus", diningHall.Name)
+	for _, menu := range diningHallMenus {
+		if menu == nil {
 			continue
 		}
-		menus = append(menus, *diningHallMenus...)
+		menus = append(menus, *menu...)
 	}
 	return &menus, nil
 }
