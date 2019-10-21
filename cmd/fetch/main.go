@@ -4,9 +4,9 @@ import (
 	"flag"
 	"sync"
 
-	dc "github.com/MichiganDiningAPI/cmd/fetch/dynamoclient"
 	mc "github.com/MichiganDiningAPI/cmd/fetch/mdiningclient"
 	"github.com/MichiganDiningAPI/cmd/fetch/mdiningprocessing"
+	dc "github.com/MichiganDiningAPI/db/dynamoclient"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
