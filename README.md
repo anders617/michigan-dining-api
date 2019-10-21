@@ -14,10 +14,20 @@ Install the [Bazel](https://docs.bazel.build/versions/master/install.html) build
 
 Run the web server:
 ```shell
-bazel run //cmd/web:web
+bazel run //cmd/web:web -- --alsologtostderr
 ```
 
 Run the fetch executable:
 ```shell
-bazel run //cmd/fetch:fetch
+bazel run //cmd/fetch:fetch -- --alsologtostderr
+```
+
+Run the db executable to create tables:
+```shell
+bazel run //cmd/db:db -- --alsologtostderr --create
+```
+
+Run the db executable to delete tables:
+```shell
+bazel run //cmd/db:db -- --alsologtostderr --delete
 ```
