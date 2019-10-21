@@ -12,7 +12,7 @@ message Menu {
     string description = 7;
     repeated Category category = 8;
     string diningHallName = 9;
-    string key = 10;
+    string diningHallMeal = 10;
 }
 
 message Category {

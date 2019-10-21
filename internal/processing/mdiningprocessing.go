@@ -19,12 +19,12 @@ func MenusToFoods(menus *[]proto.Message) ([]proto.Message, error) {
 		glog.Infof("Processing Dining Hall Menu: %s", m.DiningHallName)
 		for _, cat := range m.Category {
 			if cat == nil {
-				glog.Warningf("Category nil for menu %s", m.Key)
+				glog.Warningf("Category nil for menu %s", m.DiningHallMeal + m.Date)
 				continue
 			}
 			for _, menuItem := range cat.MenuItem {
 				if menuItem == nil {
-					glog.Warningf("MenuItem is nil for category %s in menu %s", cat.Name, m.Key)
+					glog.Warningf("MenuItem is nil for category %s in menu %s", cat.Name, m.DiningHallMeal + m.Date)
 					continue
 				}
 				food, exists := foods[menuItem.Name]

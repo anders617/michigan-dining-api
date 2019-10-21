@@ -106,7 +106,7 @@ func (m *MDiningClient) GetMenus(diningHall *pb.DiningHall) (*[]*pb.Menu, error)
 			continue
 		}
 		menu := pb.Menu{
-			Key:            diningHall.Name + m.Date + m.Name,
+			DiningHallMeal: diningHall.Name + m.Name,
 			Meal:           m.Name,
 			Date:           m.Date,
 			FormattedDate:  m.FormattedDate,
