@@ -4,7 +4,7 @@ import (
 	"flag"
 	"sync"
 
-	mc "github.com/MichiganDiningAPI/cmd/fetch/mdiningclient"
+	mc "github.com/MichiganDiningAPI/api/mdining/mdiningclient"
 	"github.com/MichiganDiningAPI/cmd/fetch/mdiningprocessing"
 	dc "github.com/MichiganDiningAPI/db/dynamoclient"
 	"github.com/golang/glog"
