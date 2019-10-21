@@ -192,7 +192,7 @@ func (d *DynamoClient) PutProtoBatch(table *string, protos []proto.Message) erro
 			continue
 		}
 		reqs = reqs[:startIdx]
-		glog.Infof("Batch Put %s (%d/%d): %d Items Remaining", reflect.TypeOf(protos), currentBatch, numBatches, len(reqs))
+		glog.Infof("Batch Put %s (%d/%d): %d Items Remaining", *table, currentBatch, numBatches, len(reqs))
 		currentBatch += 1
 	}
 	glog.Infof("Successful Batch Put %s", reflect.TypeOf(protos))

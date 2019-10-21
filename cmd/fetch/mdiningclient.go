@@ -61,7 +61,6 @@ func (m *MDiningClient) getPB(url string, reply proto.Message) error {
 	err = um.Unmarshal(strings.NewReader(s), reply)
 	if err != nil {
 		glog.Errorf("Error unmarshalling json: %s", err)
-		// glog.Errorf("Partial Unmartial: %v", reply)
 		return err
 	}
 	return nil
@@ -133,6 +132,11 @@ func (m *MDiningClient) GetDiningHallList() (*pb.DiningHalls, error) {
 	glog.Infof("GetDiningHallList %s", url)
 	err := m.getPB(url.String(), &reply)
 	if err != nil {
+		// Don't return err here. There are multiple "diningHallGroup"
+		// objects that have different structures than the one we want.
+		// This causes the pb unmarshaller to return an error even
+		// when the target diningHallGroup is processed
+		// Should probably fix the parsing
 		// return nil, err
 	}
 	diningHalls := pb.DiningHalls{}

@@ -4,9 +4,9 @@ import (
 	"flag"
 	"sync"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
 	dc "github.com/MichiganDiningAPI/cmd/fetch/dynamoclient"
 	mc "github.com/MichiganDiningAPI/cmd/fetch/mdiningclient"
+	"github.com/MichiganDiningAPI/cmd/fetch/mdiningprocessing"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
@@ -54,55 +54,18 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		dynamoclient.PutProtoBatch(&dc.MenuTableName, menus)
+		// dynamoclient.PutProtoBatch(&dc.MenuTableName, menus)
 		wg.Done()
 	}()
-	foods := make(map[string]proto.Message)
-	for _, menu := range menus {
-		m := menu.(*pb.Menu)
-		if m.Category == nil {
-			continue
-		}
-		glog.Infof("Menu: %s", m.DiningHallName)
-		for _, cat := range m.Category {
-			if cat == nil {
-				glog.Infof("Dining Hall: %s", m.DiningHallName)
-				glog.Fatalf("Nil Cat: %v", m)
-				continue
-			}
-			glog.Infof("Cat: %s", cat.Name)
-			for _, menuItem := range cat.MenuItem {
-				if menuItem == nil {
-					glog.Fatalf("Cat: %v", cat)
-				}
-				food, exists := foods[menuItem.Name]
-				if !exists {
-					foods[menuItem.Name] = &pb.Food{Key: menuItem.Name + m.Date, Date: m.Date, Name: menuItem.Name, Category: cat.Name, MenuItem: menuItem, DiningHallMatch: map[string]*pb.FoodDiningHallMatch{}}
-					food, _ = foods[menuItem.Name]
-				}
-				f := food.(*pb.Food)
-				match, e := f.DiningHallMatch[m.DiningHallName]
-				if !e {
-					match = &pb.FoodDiningHallMatch{Name: m.DiningHallName, MealTime: map[string]*pb.MealTime{}}
-					f.DiningHallMatch[m.DiningHallName] = match
-				}
-				mealTime, e2 := match.MealTime[m.Date]
-				if !e2 {
-					mealTime = &pb.MealTime{Date: m.Date, FormattedDate: m.FormattedDate, MealNames: []string{}}
-					match.MealTime[m.Date] = mealTime
-				}
-				mealTime.MealNames = append(mealTime.MealNames, m.Meal)
-			}
-		}
+	foodsSlice, err := mdiningprocessing.MenusToFoods(&menus)
+	if err != nil {
+		glog.Warningf("Could not convert menus to foods %s", err)
+	} else {
+		wg.Add(1)
+		go func() {
+			dynamoclient.PutProtoBatch(&dc.FoodTableName, foodsSlice)
+			wg.Done()
+		}()
 	}
-	foodsSlice := make([]proto.Message, 0, len(foods))
-	for _, v := range foods {
-		foodsSlice = append(foodsSlice, v)
-	}
-	wg.Add(1)
-	go func() {
-		dynamoclient.PutProtoBatch(&dc.FoodTableName, foodsSlice)
-		wg.Done()
-	}()
 	wg.Wait()
 }

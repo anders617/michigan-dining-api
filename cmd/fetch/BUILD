@@ -37,6 +37,19 @@ go_library(
 )
 
 go_library(
+    name = "mdiningprocessing",
+    srcs = ["mdiningprocessing.go"],
+    importpath = "github.com/MichiganDiningAPI/cmd/fetch/mdiningprocessing",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//api/proto:go_default_library",
+        "//util:containers",
+        "@com_github_golang_glog//:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ]
+)
+
+go_library(
     name = "go_default_library",
     srcs = ["main.go"],
     importpath = "github.com/MichiganDiningAPI/cmd/fetch",
@@ -44,6 +57,7 @@ go_library(
     deps = [
         ":dynamoclient",
         ":mdiningclient",
+        ":mdiningprocessing",
         "//api/proto:go_default_library",
         "//util:io",
         "@com_github_aws_aws_sdk_go_v2//aws:go_default_library",
