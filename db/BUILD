@@ -2,7 +2,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "dynamoclient",
-    srcs = ["dynamoclient.go"],
+    srcs = [
+        "dynamoclient.go",
+        "createtables.go",
+        "tableschemas.go",
+    ],
     importpath = "github.com/MichiganDiningAPI/db/dynamoclient",
     visibility = ["//visibility:public"],
     deps = [

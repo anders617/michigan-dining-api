@@ -21,12 +21,16 @@ func Values(input interface{}) *[]interface{} {
 	return &values
 }
 
-func AsSliceType(s *[]interface{}, outSlice interface{}) interface{} {
+func AsSliceType(s interface{}, outSlice interface{}) interface{} {
+	// Some reflection magic that takes input array and converts to a different type
+	inV := reflect.Indirect(reflect.ValueOf(s))
+
 	t := reflect.TypeOf(outSlice)
 	elemT := t.Elem()
-	out := reflect.MakeSlice(t, 0, len(*s))
-	for _, v := range *s {
-		out = reflect.Append(out, reflect.ValueOf(v).Convert(elemT))
+	out := reflect.MakeSlice(t, 0, inV.Len())
+
+	for idx := 0; idx < inV.Len(); idx++ {
+		out = reflect.Append(out, inV.Index(idx).Elem().Convert(elemT))
 	}
 	return out.Interface()
 }

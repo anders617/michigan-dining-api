@@ -6,81 +6,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/dynamodbattribute"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
-)
-
-var (
-	DiningHallsTableName = "DiningHalls"
-	ItemsTableName       = "Items"
-	MenuTableName        = "Menus"
-	FoodTableName        = "Foods"
-)
-
-var (
-	NameKey               = "name"
-	DiningHallDateMealKey = "key"
-	DateKey               = "date"
-	NameDateKey           = "key"
-)
-
-var (
-	TableNames = []string{
-		DiningHallsTableName,
-		ItemsTableName,
-		MenuTableName,
-		FoodTableName}
-	TableKeys = map[string][]dynamodb.KeySchemaElement{
-		DiningHallsTableName: []dynamodb.KeySchemaElement{
-			dynamodb.KeySchemaElement{
-				AttributeName: &NameKey,
-				KeyType:       "HASH"}},
-		ItemsTableName: []dynamodb.KeySchemaElement{
-			dynamodb.KeySchemaElement{
-				AttributeName: &NameKey,
-				KeyType:       "HASH"}},
-		MenuTableName: []dynamodb.KeySchemaElement{
-			dynamodb.KeySchemaElement{
-				AttributeName: &DiningHallDateMealKey,
-				KeyType:       "HASH"},
-			dynamodb.KeySchemaElement{
-				AttributeName: &DateKey,
-				KeyType:       "RANGE"}},
-		FoodTableName: []dynamodb.KeySchemaElement{
-			dynamodb.KeySchemaElement{
-				AttributeName: &NameDateKey,
-				KeyType:       "HASH"},
-			dynamodb.KeySchemaElement{
-				AttributeName: &DateKey,
-				KeyType:       "RANGE"}}}
-	TableAttributes = map[string][]dynamodb.AttributeDefinition{
-		DiningHallsTableName: []dynamodb.AttributeDefinition{
-			dynamodb.AttributeDefinition{
-				AttributeName: &NameKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS}},
-		ItemsTableName: []dynamodb.AttributeDefinition{
-			dynamodb.AttributeDefinition{
-				AttributeName: &NameKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS}},
-		MenuTableName: []dynamodb.AttributeDefinition{
-			dynamodb.AttributeDefinition{
-				AttributeName: &DiningHallDateMealKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS},
-			dynamodb.AttributeDefinition{
-				AttributeName: &DateKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS}},
-		FoodTableName: []dynamodb.AttributeDefinition{
-			dynamodb.AttributeDefinition{
-				AttributeName: &NameDateKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS},
-			dynamodb.AttributeDefinition{
-				AttributeName: &DateKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS}}}
 )
 
 type DynamoClient struct {
@@ -100,38 +31,6 @@ func New() *DynamoClient {
 	cfg.Region = endpoints.UsEast1RegionID
 	dc.client = dynamodb.New(cfg)
 	return dc
-}
-
-func (d *DynamoClient) createTable(table string) {
-	read, write := int64(5), int64(5)
-	keys, _ := TableKeys[table]
-	attrs, _ := TableAttributes[table]
-	createReq := d.client.CreateTableRequest(&dynamodb.CreateTableInput{
-		TableName:             &table,
-		KeySchema:             keys,
-		AttributeDefinitions:  attrs,
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{ReadCapacityUnits: &read, WriteCapacityUnits: &write}})
-	_, err := createReq.Send(context.Background())
-	if err != nil {
-		glog.Fatalf("Failed to create table %s %v", table, err)
-	}
-	glog.Infof("Created table %s.", table)
-}
-
-func (d *DynamoClient) CreateTables() error {
-	glog.Info("Checking for existence of dynamodb tables...")
-	for _, table := range TableNames {
-		describeReq := d.client.DescribeTableRequest(&dynamodb.DescribeTableInput{TableName: aws.String(table)})
-		_, err := describeReq.Send(context.Background())
-		if err != nil {
-			glog.Infof("Table %s does not exist. Creating now...", table)
-			d.createTable(table)
-			glog.Infof("Created table %s.", table)
-		} else {
-			glog.Infof("Table %s exists.", table)
-		}
-	}
-	return nil
 }
 
 func (d *DynamoClient) GetProto(table string, keys map[string]string, p proto.Message) error {
