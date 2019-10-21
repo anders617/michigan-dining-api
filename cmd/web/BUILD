@@ -7,7 +7,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//api/proto:go_default_library",
-        "//util:io",
+        "//internal/util:io",
         "@com_github_golang_glog//:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
