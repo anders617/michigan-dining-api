@@ -6,6 +6,7 @@ import (
 
 	mc "github.com/MichiganDiningAPI/api/mdining/mdiningclient"
 	dc "github.com/MichiganDiningAPI/db/dynamoclient"
+	"github.com/MichiganDiningAPI/util/containers"
 	"github.com/MichiganDiningAPI/internal/processing/mdiningprocessing"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
@@ -23,24 +24,19 @@ func main() {
 	if e != nil {
 		glog.Fatalf("Failed to get dining hall list %s", e)
 	}
-	menus := make([]proto.Message, 0)
-	for _, dininghall := range dh.DiningHalls {
-		m, err := mdining.GetMenus(dininghall)
-		if err != nil {
-			continue
-		}
-		for _, menu := range *m {
-			menus = append(menus, menu)
-		}
+	menus, err := mdining.GetAllMenus(dh)
+	menusProtoSlice := util.AsSliceType(menus, []proto.Message{}).([]proto.Message)
+	if err != nil {
+		glog.Fatalf("Failed to get menus %s", err)
 	}
-	glog.Infof("Menus count: %d", len(menus))
+	glog.Infof("Menus count: %d", len(menusProtoSlice))
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		// dynamoclient.PutProtoBatch(&dc.MenuTableName, menus)
+		dynamoclient.PutProtoBatch(&dc.MenuTableName, menusProtoSlice)
 		wg.Done()
 	}()
-	foodsSlice, err := mdiningprocessing.MenusToFoods(&menus)
+	foodsSlice, err := mdiningprocessing.MenusToFoods(&menusProtoSlice)
 	if err != nil {
 		glog.Warningf("Could not convert menus to foods %s", err)
 	} else {

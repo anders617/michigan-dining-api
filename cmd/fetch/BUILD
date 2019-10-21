@@ -11,6 +11,7 @@ go_library(
         "//api/proto:go_default_library",
         "//api/mdining:mdiningclient",
         "//util:io",
+        "//util:containers",
         "@com_github_aws_aws_sdk_go_v2//aws:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/endpoints:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/external:go_default_library",

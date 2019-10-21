@@ -66,6 +66,19 @@ func (m *MDiningClient) getPB(url string, reply proto.Message) error {
 	return nil
 }
 
+func (m *MDiningClient) GetAllMenus(diningHalls *pb.DiningHalls) (*[]*pb.Menu, error) {
+	menus := make([]*pb.Menu, 0)
+	for _, diningHall := range diningHalls.DiningHalls {
+		diningHallMenus, err := m.GetMenus(diningHall)
+		if err != nil {
+			glog.Warningf("Error getting %s menus", diningHall.Name)
+			continue
+		}
+		menus = append(menus, *diningHallMenus...)
+	}
+	return &menus, nil
+}
+
 func (m *MDiningClient) GetMenus(diningHall *pb.DiningHall) (*[]*pb.Menu, error) {
 	reply, err := m.GetMenuDetails(diningHall)
 	if err != nil {
