@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	mc "github.com/MichiganDiningAPI/api/mdining/mdiningclient"
-	"github.com/MichiganDiningAPI/cmd/fetch/mdiningprocessing"
 	dc "github.com/MichiganDiningAPI/db/dynamoclient"
+	"github.com/MichiganDiningAPI/internal/processing/mdiningprocessing"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
