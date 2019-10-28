@@ -14,5 +14,6 @@ func (d *DynamoClient) QueryMenus(diningHallName *string, date *string, meal *st
 		menus := []pb.Menu{menu}
 		return &menus, nil
 	}
+	//expression.Name("date").Equals("2019-10-25T00:00:00-04:00")
 	return nil, nil
 }

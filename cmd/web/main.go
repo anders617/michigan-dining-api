@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"sync"
@@ -11,7 +10,6 @@ import (
 	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/util/io"
 	"github.com/golang/glog"
-	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 )

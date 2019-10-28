@@ -11,12 +11,20 @@ import (
 	"github.com/golang/glog"
 )
 
+func toInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
 func main() {
 	create := flag.Bool("create", false, "Specify this flag to create necessary tables on dynamodb")
-	delete := flag.Bool("delete", false, "Specify this glag to delete necessary table on dynamo db")
+	delete := flag.Bool("delete", false, "Specify this flag to delete necessary table on dynamo db")
+	query := flag.Bool("query", false, "Specify this flag to query tables")
 	flag.Parse()
 
-	if *create && *delete {
+	if toInt(*create)+toInt(*delete)+toInt(*query) > 1 {
 		glog.Fatal("You must specify either create or delete, not both")
 	}
 
