@@ -8,6 +8,7 @@ go_library(
     deps = [
         "//api/proto:go_default_library",
         "//internal/util:io",
+        "//db:dynamoclient",
         "@com_github_golang_glog//:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",

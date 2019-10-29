@@ -17,7 +17,7 @@ var (
 	DateKey                    = "date"
 	NameDateKey                = "key"
 	FoodTableNameKey           = "key"
-	MenuTableDiningHallMealKey = "diningHallMeal		"
+	MenuTableDiningHallMealKey = "diningHallMeal"
 )
 
 var (

@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	pb "github.com/MichiganDiningAPI/api/proto"
+	"github.com/MichiganDiningAPI/db/dynamoclient"
 	"github.com/MichiganDiningAPI/internal/util/io"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -25,6 +26,12 @@ var mockFilterableEntries pb.FilterableEntries
 const proxiedGrpcPort = "3000"
 
 type server struct {
+	dc *dynamoclient.DynamoClient
+}
+
+func NewServer() *server {
+	server := server{dc: dynamoclient.New()}
+	return &server
 }
 
 //
@@ -54,6 +61,27 @@ func (s *server) GetAll(ctx context.Context, req *pb.AllRequest) (*pb.AllReply, 
 	return &pb.AllReply{DiningHalls: &mockDiningHalls, Items: &mockItems, FilterableEntries: &mockFilterableEntries}, nil
 }
 
+func (s *server) GetMenu(ctx context.Context, req *pb.MenuRequest) (*pb.MenuReply, error) {
+	glog.Infof("GetMenu req{%v}", req)
+	diningHall, date, meal := &req.DiningHall, &req.Date, &req.Meal
+	if *diningHall == "" {
+		diningHall = nil
+	}
+	if *date == "" {
+		date = nil
+	}
+	if *meal == "" {
+		meal = nil
+	}
+	menus, err := s.dc.QueryMenus(diningHall, date, meal)
+	if err != nil {
+		glog.Infof("GetMenu Error %s", err)
+		return nil, err
+	}
+	glog.Infof("GetMenu res{%d menus}", len(*menus))
+	return &pb.MenuReply{Menus: *menus}, nil
+}
+
 //
 // Serves GRPC requests
 //
@@ -66,7 +94,7 @@ func serveGRPC(port string) {
 	s := grpc.NewServer()
 
 	// Register Server
-	pb.RegisterMDiningServer(s, &server{})
+	pb.RegisterMDiningServer(s, NewServer())
 
 	glog.Infof("Serving GRPC Requests on %s", port)
 	if err := s.Serve(lis); err != nil {
@@ -81,6 +109,13 @@ func main() {
 	}
 	flag.Parse()
 	wg.Add(2)
+
+	dc := dynamoclient.New()
+	_, err := dc.QueryDiningHalls()
+	if err != nil {
+		glog.Fatalf("QueryDIningHalls err %s", err)
+	}
+	glog.Infof("QueryDiningHalls Success")
 
 	glog.Infof("Reading api/proto/sample/dininghalls.proto.txt")
 	util.ReadProtoFromFile("api/proto/sample/dininghalls.proto.txt", &mockDiningHalls)
@@ -111,7 +146,7 @@ func main() {
 	grpcS := grpc.NewServer()
 
 	// Register Server
-	pb.RegisterMDiningServer(grpcS, &server{})
+	pb.RegisterMDiningServer(grpcS, NewServer())
 
 	// HTTP
 	mux := runtime.NewServeMux()

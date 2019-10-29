@@ -6,6 +6,7 @@ import "google/api/annotations.proto";
 import "api/proto/dininghalls.proto";
 import "api/proto/items.proto";
 import "api/proto/filterableentries.proto";
+import "api/proto/menu.proto";
 
 service MDining {
   rpc GetDiningHalls(DiningHallsRequest) returns (DiningHallsReply) {
@@ -32,6 +33,12 @@ service MDining {
       get: "/v1/all"
     };
   }
+
+  rpc GetMenu(MenuRequest) returns (MenuReply) {
+    option (google.api.http) = {
+      get: "/v1/menus"
+    };
+  }
 }
 
 message DiningHallsRequest {}
@@ -47,6 +54,14 @@ message FilterableEntriesRequest {}
 message FilterableEntriesReply { FilterableEntries filterableEntries = 1; }
 
 message AllRequest {}
+
+message MenuRequest {
+  string date = 1;
+  string meal = 2;
+  string diningHall = 3;
+}
+
+message MenuReply { repeated Menu menus = 1; }
 
 message AllReply {
   DiningHalls diningHalls = 1;
