@@ -14,4 +14,4 @@ before_install:
   - sudo dpkg -i bazel_1.1.0-linux-x86_64.deb
 
 script:
-  - bazel build //cmd:all
+  - bazel --bazelrc=.travis.bazelrc build //cmd:all

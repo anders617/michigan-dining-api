@@ -42,11 +42,38 @@ func (d *DynamoClient) QueryMenus(diningHallName *string, date *string, meal *st
 		menus := []*pb.Menu{&menu}
 		return &menus, nil
 	}
-	if date != nil && diningHallName != nil && meal == nil {
-		keyCond := expression.Key(DateKey).Equal(expression.Value(*date)).And(expression.Key(MenuTableDiningHallMealKey).BeginsWith(*diningHallName))
+	if date != nil && meal == nil {
+		keyCond := expression.Key(DateKey).Equal(expression.Value(*date))
+		if diningHallName != nil {
+			keyCond = keyCond.And(expression.Key(MenuTableDiningHallMealKey).BeginsWith(*diningHallName))
+		}
 		expr, _ := expression.NewBuilder().WithKeyCondition(keyCond).Build()
 		params := &dynamodb.QueryInput{
 			KeyConditionExpression:    expr.KeyCondition(),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+			TableName:                 aws.String(MenuTableName),
+		}
+		req := d.client.QueryRequest(params)
+		result, err := req.Send(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		menus := make([]*pb.Menu, len(result.Items))
+		for idx, item := range result.Items {
+			menu := pb.Menu{}
+			dynamodbattribute.UnmarshalMap(item, &menu)
+			menus[idx] = &menu
+		}
+		return &menus, nil
+	}
+	if date != nil && meal != nil && diningHallName == nil {
+		keyCond := expression.Key(DateKey).Equal(expression.Value(*date))
+		filter := expression.Name("meal").Equal(expression.Value(*meal))
+		expr, _ := expression.NewBuilder().WithKeyCondition(keyCond).WithFilter(filter).Build()
+		params := &dynamodb.QueryInput{
+			KeyConditionExpression:    expr.KeyCondition(),
+			FilterExpression:          expr.Filter(),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			TableName:                 aws.String(MenuTableName),
