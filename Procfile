@@ -1,2 +1,2 @@
-  web: cmd/web/web
-  worker: cmd/fetch/fetch
+  web: cmd/web/web --alsologtostderr
+  worker: cmd/fetch/fetch --alsologtostderr
