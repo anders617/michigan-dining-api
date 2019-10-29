@@ -31,3 +31,18 @@ Run the db executable to delete tables:
 ```shell
 bazel run //cmd/db:db -- --alsologtostderr --delete
 ```
+
+## Deployment
+
+Currently michigan-dining-api is deployed and hosted on [Heroku](https://www.heroku.com/home)
+
+In order to deploy:
+* Setup the Heroku application to point to this repository
+* Add the custom [heroku-buildpack-bazel](https://github.com/anders617/heroku-buildpack-bazel) buildpack to allow building with bazel
+* Setup the [HerokuScheduler](https://devcenter.heroku.com/articles/scheduler) add on to run the command `cmd/fetch/fetch` daily in order to fill the tables
+* Set the following Heroku config vars:
+    * `AWS_ACCESS_KEY_ID` - Access key used for AWS DynamoDB access
+    * `AWS_SECRET_ACCESS_KEY` - Secret used for AWS DynamoDB access
+    * `BAZEL_BUILD_PATH` - `//cmd:all`
+    * `BAZEL_VERSION` - `0.29.1` (or later version)
+* Go to the deploy tab and click deploy branch
