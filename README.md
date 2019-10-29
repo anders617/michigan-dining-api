@@ -1,4 +1,5 @@
 # michigan-dining-api
+[![Build Status](https://travis-ci.com/anders617/michigan-dining-api.svg?token=cMRcZeh9VAjpBXRsmo8P&branch=master)](https://travis-ci.com/anders617/michigan-dining-api)
 
 A system for scraping and serving information from the University of Michigan dining API.
 
