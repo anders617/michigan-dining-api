@@ -155,3 +155,10 @@ go_repository(
     sum = "h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=",
     version = "v0.0.0-20180206201540-c2b33e8439af",
 )
+
+go_repository(
+    name = "com_github_soheilhy_cmux",
+    importpath = "github.com/soheilhy/cmux",
+    sum = "h1:0HKaf1o97UwFjHH9o5XsHUOF+tqmdA7KEzXLpiyaw0E=",
+    version = "v0.1.4",
+)

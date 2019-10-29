@@ -3,27 +3,26 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"net"
 	"net/http"
+	"os"
 	"sync"
 
 	pb "github.com/MichiganDiningAPI/api/proto"
-	"github.com/MichiganDiningAPI/util/io"
+	"github.com/MichiganDiningAPI/internal/util/io"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
-)
-
-const (
-	grpcPort = ":1234"
-	httpPort = ":1235"
-	grpcAddr = "localhost:1234"
 )
 
 var wg sync.WaitGroup
 var mockDiningHalls pb.DiningHalls
 var mockItems pb.Items
 var mockFilterableEntries pb.FilterableEntries
+
+const proxiedGrpcPort = "3000"
 
 type server struct {
 }
@@ -58,9 +57,9 @@ func (s *server) GetAll(ctx context.Context, req *pb.AllRequest) (*pb.AllReply, 
 //
 // Serves GRPC requests
 //
-func serveGRPC() {
+func serveGRPC(port string) {
 	defer wg.Done()
-	lis, err := net.Listen("tcp", grpcPort)
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		glog.Fatalf("Failed to listen: %v", err)
 	}
@@ -69,42 +68,73 @@ func serveGRPC() {
 	// Register Server
 	pb.RegisterMDiningServer(s, &server{})
 
+	glog.Infof("Serving GRPC Requests on %s", port)
 	if err := s.Serve(lis); err != nil {
 		glog.Fatalf("failed to server: %v", err)
 	}
 }
 
-//
-// Proxies REST requests to GRPC server, converting to Proto
-//
-func serveHTTP() {
-	defer wg.Done()
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	mux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-
-	// Set the address to forward requests to to grpcAddr
-	err := pb.RegisterMDiningHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
-	if err != nil {
-		return
-	}
-
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	http.ListenAndServe(":8081", mux)
-}
-
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
 	flag.Parse()
 	wg.Add(2)
 
+	glog.Infof("Reading api/proto/sample/dininghalls.proto.txt")
 	util.ReadProtoFromFile("api/proto/sample/dininghalls.proto.txt", &mockDiningHalls)
+	glog.Infof("Reading api/proto/sample/items.proto.txt")
 	util.ReadProtoFromFile("api/proto/sample/items.proto.txt", &mockItems)
+	glog.Infof("Reading api/proto/sample/filterableentries.proto.txt")
 	util.ReadProtoFromFile("api/proto/sample/filterableentries.proto.txt", &mockFilterableEntries)
 
-	go serveGRPC()
-	go serveHTTP()
+	// go serveGRPC(port)
+	// go serveHTTP(port)
+
+	// Create the main listener.
+	glog.Infof("Listening on port " + port)
+	l, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create a cmux.
+	m := cmux.New(l)
+
+	// Match connections in order:
+	// First grpc, then HTTP, and otherwise Go RPC/TCP.
+	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	httpL := m.Match(cmux.HTTP1Fast())
+
+	// Create your protocol servers.
+	grpcS := grpc.NewServer()
+
+	// Register Server
+	pb.RegisterMDiningServer(grpcS, &server{})
+
+	// HTTP
+	mux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	// Set the address to forward requests to to grpcAddr
+	err = pb.RegisterMDiningHandlerFromEndpoint(ctx, mux, "localhost:"+proxiedGrpcPort, opts)
+	httpS := &http.Server{
+		Handler: mux,
+	}
+
+	// Use the muxed listeners for your servers.
+	// One GRPC server to handle proxied http requests
+	go serveGRPC(proxiedGrpcPort)
+	// Second GRPC server to handle direct GRPC requests
+	go grpcS.Serve(grpcL)
+	// HTTP Server To Proxy Requests to First GRPC Server
+	go httpS.Serve(httpL)
+
+	// Start serving!
+	m.Serve()
+
 	wg.Wait()
 }
