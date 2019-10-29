@@ -34,7 +34,7 @@ bazel run //cmd/db:db -- --alsologtostderr --delete
 
 ## Deployment
 
-Currently michigan-dining-api is deployed and hosted on [Heroku](https://www.heroku.com/home)
+Currently michigan-dining-api is deployed and hosted on [Heroku](https://www.heroku.com/home) at https://michigan-dining-api.herokuapp.com
 
 In order to deploy:
 * Setup the Heroku application to point to this repository
@@ -46,3 +46,10 @@ In order to deploy:
     * `BAZEL_BUILD_PATH` - `//cmd:all`
     * `BAZEL_VERSION` - `0.29.1` (or later version)
 * Go to the deploy tab and click deploy branch
+
+## Endpoints
+[/v1/items](https://michigan-dining-api.herokuapp.com/v1/items) \
+[/v1/diningHalls](https://michigan-dining-api.herokuapp.com/v1/diningHalls) \
+[/v1/filterableEntries](https://michigan-dining-api.herokuapp.com/v1/filterableEntries) \
+[/v1/all](https://michigan-dining-api.herokuapp.com/v1/all)
+
