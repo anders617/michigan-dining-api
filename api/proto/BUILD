@@ -35,6 +35,12 @@ proto_library(
 )
 
 proto_library(
+    name = "foodstat_proto",
+    srcs = ["foodstat.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
     name = "mdining_proto",
     srcs = ["mdining.proto"],
     visibility = ["//visibility:public"],
@@ -100,6 +106,7 @@ go_proto_library(
         ":mdining_proto",
         ":menu_proto",
         ":food_proto",
+        ":foodstat_proto",
     ],
     visibility = ["//visibility:public"],
     deps = [
