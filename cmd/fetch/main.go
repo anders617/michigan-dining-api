@@ -6,7 +6,7 @@ import (
 
 	mc "github.com/MichiganDiningAPI/api/mdining/mdiningclient"
 	dc "github.com/MichiganDiningAPI/db/dynamoclient"
-	"github.com/MichiganDiningAPI/util/containers"
+	"github.com/MichiganDiningAPI/internal/util/containers"
 	"github.com/MichiganDiningAPI/internal/processing/mdiningprocessing"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"

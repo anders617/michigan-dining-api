@@ -14,7 +14,7 @@ go_library(
 go_library(
     name = "containers",
     srcs = ["containers.go"],
-    importpath = "github.com/MichiganDiningAPI/util/containers",
+    importpath = "github.com/MichiganDiningAPI/internal/util/containers",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_golang_glog//:go_default_library",

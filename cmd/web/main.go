@@ -82,6 +82,36 @@ func (s *server) GetMenu(ctx context.Context, req *pb.MenuRequest) (*pb.MenuRepl
 	return &pb.MenuReply{Menus: *menus}, nil
 }
 
+func (s *server) GetFood(ctx context.Context, req *pb.FoodRequest) (*pb.FoodReply, error) {
+	glog.Infof("GetFood req{%v}", req)
+	name, date, startDate, endDate := &req.Name, &req.Date, &req.StartDate, &req.EndDate
+	if *name == "" {
+		name = nil
+	}
+	if *date == "" {
+		date = nil
+	}
+	if *startDate == "" {
+		startDate = nil
+	}
+	if *endDate == "" {
+		endDate = nil
+	}
+	var foods *[]*pb.Food
+	var err error
+	if startDate != nil || endDate != nil {
+		foods, err = s.dc.QueryFoodsDateRange(name, startDate, endDate)
+	} else {
+		foods, err = s.dc.QueryFoods(name, date)
+	}
+	if err != nil {
+		glog.Infof("GetFood Error %s", err)
+		return nil, err
+	}
+	glog.Infof("GetFood res{%d foods}", len(*foods))
+	return &pb.FoodReply{Foods: *foods}, nil
+}
+
 //
 // Serves GRPC requests
 //

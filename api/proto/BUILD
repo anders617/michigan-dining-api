@@ -43,6 +43,7 @@ proto_library(
         ":filterable_entries_proto",
         ":items_proto",
         ":menu_proto",
+        ":food_proto",
         "@go_googleapis//google/api:annotations_proto",
     ],
 )

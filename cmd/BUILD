@@ -13,3 +13,8 @@ alias(
     name="db",
     actual="//cmd/db:db"
 )
+
+alias(
+    name="analyze",
+    actual="//cmd/analyze:analyze"
+)

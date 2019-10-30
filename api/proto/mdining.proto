@@ -7,6 +7,7 @@ import "api/proto/dininghalls.proto";
 import "api/proto/items.proto";
 import "api/proto/filterableentries.proto";
 import "api/proto/menu.proto";
+import "api/proto/food.proto";
 
 service MDining {
   rpc GetDiningHalls(DiningHallsRequest) returns (DiningHallsReply) {
@@ -39,6 +40,12 @@ service MDining {
       get: "/v1/menus"
     };
   }
+
+  rpc GetFood(FoodRequest) returns (FoodReply) {
+    option (google.api.http) = {
+      get: "/v1/foods"
+    };
+  }
 }
 
 message DiningHallsRequest {}
@@ -62,6 +69,17 @@ message MenuRequest {
 }
 
 message MenuReply { repeated Menu menus = 1; }
+
+message FoodRequest {
+  string name = 1;
+  string date = 2;
+  string startDate = 3;
+  string endDate = 4;
+}
+
+message FoodReply {
+  repeated Food foods = 1;
+}
 
 message AllReply {
   DiningHalls diningHalls = 1;

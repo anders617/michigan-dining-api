@@ -145,8 +145,8 @@ go_repository(
 go_repository(
     name = "com_github_aws_aws_sdk_go_v2",
     importpath = "github.com/aws/aws-sdk-go-v2",
-    sum = "h1:GE6BJJLTfsv1VqwwnY2KcUlrgQ8GtZAM83jeQChgNDM=",
-    version = "v0.14.0",
+    sum = "h1:mQCV2MV4I0L02Nwi1xs0HM7yWbrcWjjUOy1UAv27sw8=",
+    version = "v0.15.0",
 )
 
 go_repository(
@@ -161,4 +161,11 @@ go_repository(
     importpath = "github.com/soheilhy/cmux",
     sum = "h1:0HKaf1o97UwFjHH9o5XsHUOF+tqmdA7KEzXLpiyaw0E=",
     version = "v0.1.4",
+)
+
+go_repository(
+    name = "com_github_montanaflynn_stats",
+    importpath = "github.com/montanaflynn/stats",
+    sum = "h1:2EkzeTSqBB4V4bJwWrt5gIIrZmpJBcoIRGS2kWLgzmk=",
+    version = "v0.5.0",
 )
