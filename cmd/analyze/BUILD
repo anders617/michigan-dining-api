@@ -9,6 +9,7 @@ go_library(
         "//api/proto:go_default_library",
         "//internal/util:io",
         "//internal/util:containers",
+        "//internal/util:date",
         "//db:dynamoclient",
         "@com_github_montanaflynn_stats//:go_default_library",
         "@com_github_golang_glog//:go_default_library",
