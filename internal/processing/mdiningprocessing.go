@@ -4,7 +4,7 @@ import (
 	"strings"
 	
 	pb "github.com/MichiganDiningAPI/api/proto"
-	"github.com/MichiganDiningAPI/util/containers"
+	"github.com/MichiganDiningAPI/internal/util/containers"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
