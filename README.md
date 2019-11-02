@@ -40,7 +40,7 @@ Currently michigan-dining-api is deployed and hosted on [Heroku](https://www.her
 In order to deploy your own server:
 * Setup the Heroku application to point to this repository
 * Add the custom [heroku-buildpack-bazel](https://github.com/anders617/heroku-buildpack-bazel) buildpack to allow building with bazel
-* Setup the [HerokuScheduler](https://devcenter.heroku.com/articles/scheduler) add on to run the command `cmd/fetch/fetch` daily in order to fill the tables
+* Setup the [HerokuScheduler](https://devcenter.heroku.com/articles/scheduler) add on to run the command `cmd/fetch/fetch`  and `cmd/analyze/analyze` daily in order to fill the data tables
 * Set the following Heroku config vars:
     * `AWS_ACCESS_KEY_ID` - Access key used for AWS DynamoDB access
     * `AWS_SECRET_ACCESS_KEY` - Secret used for AWS DynamoDB access
