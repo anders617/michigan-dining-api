@@ -15,22 +15,27 @@ Install the [Bazel](https://docs.bazel.build/versions/master/install.html) build
 
 Run the web server:
 ```shell
-bazel run //cmd/web:web -- --alsologtostderr
+bazel run //cmd:web -- --alsologtostderr
 ```
 
-Run the fetch executable:
+Run the fetch executable to fill the DiningHalls/Foods/Menus tables:
 ```shell
-bazel run //cmd/fetch:fetch -- --alsologtostderr
+bazel run //cmd:fetch -- --alsologtostderr
+```
+
+Run the analyze executable to fill the FoodStats table (depends on data from running `//cmd:fetch` above):
+```shell
+bazel run //cmd:analyze -- --alsologtostderr
 ```
 
 Run the db executable to create tables:
 ```shell
-bazel run //cmd/db:db -- --alsologtostderr --create
+bazel run //cmd:db -- --alsologtostderr --create
 ```
 
 Run the db executable to delete tables:
 ```shell
-bazel run //cmd/db:db -- --alsologtostderr --delete
+bazel run //cmd:db -- --alsologtostderr --delete
 ```
 
 ## Deployment
