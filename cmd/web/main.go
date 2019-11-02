@@ -113,6 +113,14 @@ func (s *server) GetFood(ctx context.Context, req *pb.FoodRequest) (*pb.FoodRepl
 	return &pb.FoodReply{Foods: *foods}, nil
 }
 
+// allowCORS allows Cross Origin Resoruce Sharing from any origin.
+func allowCORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		h.ServeHTTP(w, r)
+	})
+}
+
 //
 // Serves GRPC requests
 //
@@ -161,16 +169,6 @@ func main() {
 
 	mockFilterableEntries = mdiningprocessing.ItemsToFilterableEntries(mockItems)
 
-	// glog.Infof("Reading api/proto/sample/dininghalls.proto.txt")
-	// util.ReadProtoFromFile("api/proto/sample/dininghalls.proto.txt", &mockDiningHalls)
-	// glog.Infof("Reading api/proto/sample/items.proto.txt")
-	// util.ReadProtoFromFile("api/proto/sample/items.proto.txt", mockItems)
-	// glog.Infof("Reading api/proto/sample/filterableentries.proto.txt")
-	// util.ReadProtoFromFile("api/proto/sample/filterableentries.proto.txt", mockFilterableEntries)
-
-	// go serveGRPC(port)
-	// go serveHTTP(port)
-
 	// Create the main listener.
 	glog.Infof("Listening on port " + port)
 	l, err := net.Listen("tcp", ":"+port)
@@ -201,7 +199,7 @@ func main() {
 	// Set the address to forward requests to to grpcAddr
 	err = pb.RegisterMDiningHandlerFromEndpoint(ctx, mux, "localhost:"+proxiedGrpcPort, opts)
 	httpS := &http.Server{
-		Handler: mux,
+		Handler: allowCORS(mux),
 	}
 
 	// Use the muxed listeners for your servers.
