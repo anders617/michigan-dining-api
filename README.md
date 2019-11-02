@@ -37,7 +37,7 @@ bazel run //cmd/db:db -- --alsologtostderr --delete
 
 Currently michigan-dining-api is deployed and hosted on [Heroku](https://www.heroku.com/home) at https://michigan-dining-api.herokuapp.com
 
-In order to deploy:
+In order to deploy your own server:
 * Setup the Heroku application to point to this repository
 * Add the custom [heroku-buildpack-bazel](https://github.com/anders617/heroku-buildpack-bazel) buildpack to allow building with bazel
 * Setup the [HerokuScheduler](https://devcenter.heroku.com/articles/scheduler) add on to run the command `cmd/fetch/fetch` daily in order to fill the tables
@@ -53,4 +53,6 @@ In order to deploy:
 [/v1/diningHalls](https://michigan-dining-api.herokuapp.com/v1/diningHalls) \
 [/v1/filterableEntries](https://michigan-dining-api.herokuapp.com/v1/filterableEntries) \
 [/v1/all](https://michigan-dining-api.herokuapp.com/v1/all)
+[/v1/menu](https://michigan-dining-api.herokuapp.com/v1/menu?d)
+[/v1/stats](https://michigan-dining-api.herokuapp.com/v1/stats)
 

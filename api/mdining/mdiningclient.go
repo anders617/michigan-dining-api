@@ -13,6 +13,7 @@ import (
 
 	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/api/proto/mdiningapi"
+	"github.com/MichiganDiningAPI/internal/util/date"
 )
 
 const (
@@ -106,10 +107,16 @@ func (m *MDiningClient) GetMenus(diningHall *pb.DiningHall) (*[]*pb.Menu, error)
 			// TODO: Why nil?
 			continue
 		}
+		dateTime, err := date.Parse(&m.Date)
+		if err != nil {
+			glog.Warningf("Could not parse date %s", m.Date)
+			continue
+		}
+		dateNoTime := date.FormatNoTime(dateTime)
 		menu := pb.Menu{
 			DiningHallMeal: diningHall.Name + m.Name,
 			Meal:           m.Name,
-			Date:           m.Date,
+			Date:           dateNoTime,
 			FormattedDate:  m.FormattedDate,
 			RatingCount:    m.RatingCount,
 			RatingScore:    m.RatingScore,

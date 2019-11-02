@@ -40,7 +40,7 @@ func updateStats(foodStats *pb.FoodStat, food *pb.Food) {
 	if !e {
 		foodStats.FoodWeekdayCounts[food.Key] = &pb.IntToInt{Data: make(map[int64]int64)}
 	}
-	d, _ := date.Parse(&food.Date)
+	d, _ := date.ParseNoTime(&food.Date)
 	foodStats.FoodWeekdayCounts[food.Key].Data[int64(d.Weekday())] += timesServed
 	_, e = foodStats.WeekdayFoodCounts[int64(d.Weekday())]
 	if !e {
@@ -98,34 +98,11 @@ func main() {
 
 	dc := dynamoclient.New()
 
-	// counts := make(map[string]int)
-	// foodDhCounts := make(map[string]map[string]int)
-	// dhFoodCounts := make(map[string]map[string]int)
-	// categoryCounts := make(map[string]int)
-	// allergenCounts := make(map[string]int)
-	// attributeCounts := make(map[string]int)
-	// foodWeekdayCounts := make(map[string]map[time.Weekday]int)
-	// weekdayFoodCounts := make(map[time.Weekday]map[string]int)
-
-	foodStats := &pb.FoodStat{
-		Date:                  date.Format(date.Now()),
-		TimesServed:           map[string]int64{},
-		FoodDiningHallCounts:  map[string]*pb.StringToInt{},
-		DiningHallFoodCounts:  map[string]*pb.StringToInt{},
-		CategoryCounts:        map[string]int64{},
-		AllergenCounts:        map[string]int64{},
-		AttributeCounts:       map[string]int64{},
-		WeekdayFoodCounts:     map[int64]*pb.StringToInt{},
-		FoodWeekdayCounts:     map[string]*pb.IntToInt{},
-		NumUniqueFoods:        0,
-		TotalFoodMealsServed:  0,
-		DiningHallMealsServed: map[string]int64{},
-	}
-	glog.Infof("%v", foodStats)
-
 	stats := map[string]*pb.FoodStat{}
 
-	dc.ForEachFood(nil, nil, func(food *pb.Food) {
+	// Find all foods and calculate
+	startDate := date.FormatNoTime(date.Now())
+	dc.ForEachFood(&startDate, nil, func(food *pb.Food) {
 		stat, exists := stats[food.Date]
 		if !exists {
 			stat = NewFoodStat(food.Date)
@@ -138,6 +115,7 @@ func main() {
 		stat.NumUniqueFoods = int64(len(stat.TimesServed))
 	}
 
+	// Push results to dynamodb
 	for date, stat := range stats {
 		glog.Infof("Putting stats for date %s", date)
 		err := dc.PutProto(&dynamoclient.FoodStatsTableName, stat)
