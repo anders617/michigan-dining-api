@@ -49,10 +49,11 @@ In order to deploy your own server:
 * Go to the deploy tab and click deploy branch
 
 ## Endpoints
+You can each link for an example \
 [/v1/items](https://michigan-dining-api.herokuapp.com/v1/items) \
 [/v1/diningHalls](https://michigan-dining-api.herokuapp.com/v1/diningHalls) \
 [/v1/filterableEntries](https://michigan-dining-api.herokuapp.com/v1/filterableEntries) \
-[/v1/all](https://michigan-dining-api.herokuapp.com/v1/all)
-[/v1/menu](https://michigan-dining-api.herokuapp.com/v1/menu?d)
+[/v1/all](https://michigan-dining-api.herokuapp.com/v1/all) \
+[/v1/menus?date={yyyy-MM-dd}&diningHall={DINING_HALL}&meal={MEAL}](https://michigan-dining-api.herokuapp.com/v1/menus?date=2019-11-04&diningHall=Bursley%20Dining%20Hall&meal=LUNCH) \
 [/v1/stats](https://michigan-dining-api.herokuapp.com/v1/stats)
 
