@@ -12,6 +12,25 @@ import (
 	"github.com/golang/glog"
 )
 
+func (d *DynamoClient) QueryFoodStats() (*[]*pb.FoodStat, error) {
+	params := &dynamodb.ScanInput{
+		TableName: aws.String(FoodStatsTableName),
+	}
+	// Make the DynamoDB Query API call
+	req := d.client.ScanRequest(params)
+	result, err := req.Send(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	foodStats := make([]*pb.FoodStat, 0)
+	for _, i := range result.Items {
+		stat := pb.FoodStat{}
+		dynamodbattribute.UnmarshalMap(i, &stat)
+		foodStats = append(foodStats, &stat)
+	}
+	return &foodStats, nil
+}
+
 func (d *DynamoClient) ForEachFood(startDate *string, endDate *string, fn func(*pb.Food)) error {
 	var filter expression.ConditionBuilder
 	if startDate != nil && endDate != nil {

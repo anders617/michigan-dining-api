@@ -2,6 +2,7 @@ package mdiningserver
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	pb "github.com/MichiganDiningAPI/api/proto"
@@ -11,15 +12,12 @@ import (
 	"github.com/golang/glog"
 )
 
-var mockDiningHalls *pb.DiningHalls = &pb.DiningHalls{}
-var mockItems *pb.Items = &pb.Items{}
-var mockFilterableEntries *pb.FilterableEntries = &pb.FilterableEntries{}
-
 type Server struct {
 	dc                *dynamoclient.DynamoClient
 	diningHalls       *pb.DiningHalls
 	items             *pb.Items
 	filterableEntries *pb.FilterableEntries
+	foodStats         *[]*pb.FoodStat
 	lastFetch         time.Time
 }
 
@@ -31,13 +29,27 @@ func New() *Server {
 
 func (s *Server) fetchData() {
 	s.lastFetch = date.Now()
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go s.fetchDiningHalls(wg)
+	go s.fetchItemsAndFilterableEntries(wg)
+	go s.fetchFoodStats(wg)
+	wg.Wait()
+}
+
+func (s *Server) fetchDiningHalls(wg *sync.WaitGroup) {
+	defer wg.Done()
 	var err error
 	s.diningHalls, err = s.dc.QueryDiningHalls()
 	if err != nil {
 		glog.Fatalf("QueryDiningHalls err %s", err)
 	}
 	glog.Infof("QueryDiningHalls Success")
+}
 
+func (s *Server) fetchItemsAndFilterableEntries(wg *sync.WaitGroup) {
+	defer wg.Done()
+	var err error
 	var foods *[]*pb.Food
 	// Get all foods after today
 	startDate := date.Format(date.DayStart(date.Now()))
@@ -47,8 +59,17 @@ func (s *Server) fetchData() {
 	}
 	glog.Infof("QueryFoodsDateRange Success")
 	s.items = mdiningprocessing.FoodsToItems(foods)
+	s.filterableEntries = mdiningprocessing.ItemsToFilterableEntries(s.items)
+}
 
-	s.filterableEntries = mdiningprocessing.ItemsToFilterableEntries(mockItems)
+func (s *Server) fetchFoodStats(wg *sync.WaitGroup) {
+	defer wg.Done()
+	var err error
+	s.foodStats, err = s.dc.QueryFoodStats()
+	if err != nil {
+		glog.Fatalf("QueryFoodStats err %s", err)
+	}
+	glog.Infof("QueryFoodStats Success")
 }
 
 //
@@ -57,7 +78,7 @@ func (s *Server) fetchData() {
 func (s *Server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest) (*pb.DiningHallsReply, error) {
 	glog.Infof("GetDiningHalls req{%v}", req)
 	// Currently just returns static dining halls data that's checked into git
-	return &pb.DiningHallsReply{DiningHalls: mockDiningHalls.DiningHalls}, nil
+	return &pb.DiningHallsReply{DiningHalls: s.diningHalls.DiningHalls}, nil
 }
 
 //
@@ -65,17 +86,17 @@ func (s *Server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest)
 //
 func (s *Server) GetItems(ctx context.Context, req *pb.ItemsRequest) (*pb.ItemsReply, error) {
 	glog.Infof("GetItems req{%v}", req)
-	return &pb.ItemsReply{Items: mockItems.Items}, nil
+	return &pb.ItemsReply{Items: s.items.Items}, nil
 }
 
 func (s *Server) GetFilterableEntries(ctx context.Context, req *pb.FilterableEntriesRequest) (*pb.FilterableEntriesReply, error) {
 	glog.Infof("GetFilterableEntries req{%v}", req)
-	return &pb.FilterableEntriesReply{FilterableEntries: mockFilterableEntries.FilterableEntries}, nil
+	return &pb.FilterableEntriesReply{FilterableEntries: s.filterableEntries.FilterableEntries}, nil
 }
 
 func (s *Server) GetAll(ctx context.Context, req *pb.AllRequest) (*pb.AllReply, error) {
 	glog.Infof("GetAll req{%v}", req)
-	return &pb.AllReply{DiningHalls: mockDiningHalls.DiningHalls, Items: mockItems.Items, FilterableEntries: mockFilterableEntries.FilterableEntries}, nil
+	return &pb.AllReply{DiningHalls: s.diningHalls.DiningHalls, Items: s.items.Items, FilterableEntries: s.filterableEntries.FilterableEntries}, nil
 }
 
 func (s *Server) GetMenu(ctx context.Context, req *pb.MenuRequest) (*pb.MenuReply, error) {
