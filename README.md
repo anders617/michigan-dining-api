@@ -45,7 +45,7 @@ In order to deploy your own server:
     * `AWS_ACCESS_KEY_ID` - Access key used for AWS DynamoDB access
     * `AWS_SECRET_ACCESS_KEY` - Secret used for AWS DynamoDB access
     * `BAZEL_BUILD_PATH` - `//cmd:all`
-    * `BAZEL_VERSION` - `0.29.1` (or later version)
+    * `BAZEL_VERSION` - `1.1.0` (or later version)
 * Go to the deploy tab and click deploy branch
 
 ## Endpoints

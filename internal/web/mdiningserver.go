@@ -52,7 +52,7 @@ func (s *Server) fetchItemsAndFilterableEntries(wg *sync.WaitGroup) {
 	var err error
 	var foods *[]*pb.Food
 	// Get all foods after today
-	startDate := date.Format(date.DayStart(date.Now()))
+	startDate := date.FormatNoTime(date.Now())
 	foods, err = s.dc.QueryFoodsDateRange(nil, &startDate, nil)
 	if err != nil {
 		glog.Fatalf("QueryFoodsDateRange err %s", err)
