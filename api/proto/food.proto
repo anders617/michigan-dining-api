@@ -8,7 +8,7 @@ message Food {
     string key = 1;
     string date = 2;
     string name = 3;
-    string category = 4;
+    repeated string category = 4;
     MenuItem menuItem = 5;
     map<string, FoodDiningHallMatch> diningHallMatch = 6;
 }

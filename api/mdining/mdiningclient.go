@@ -57,8 +57,8 @@ func (m *MDiningClient) getPB(url string, reply proto.Message) error {
 	// um.Unmarshal(res.Body, reply)
 	// Sometimes mdining returns empty string instead of 0
 	// This messes with jsonpb unmarshalling since it expects an int
-	strings.ReplaceAll(s, "portionSize\":\"\"", "portionSize\":0")
-	strings.ReplaceAll(s, "postalCode\":\"\"", "postalCode\":0")
+	s = strings.ReplaceAll(s, "portionSize\":\"\"", "portionSize\":0")
+	s = strings.ReplaceAll(s, "postalCode\":\"\"", "postalCode\":0")
 	err = um.Unmarshal(strings.NewReader(s), reply)
 	if err != nil {
 		glog.Errorf("Error unmarshalling json: %s", err)
@@ -76,7 +76,7 @@ func (m *MDiningClient) GetAllMenus(diningHalls *pb.DiningHalls) (*[]*pb.Menu, e
 			defer wg.Done()
 			menu, err := m.GetMenus(diningHall)
 			if err != nil {
-				glog.Warningf("Error getting %s menus", diningHall.Name)
+				glog.Warningf("Error getting %s menus %s", diningHall.Name, err)
 				diningHallMenus[idx] = nil
 				return
 			}
@@ -100,6 +100,7 @@ func (m *MDiningClient) GetMenus(diningHall *pb.DiningHall) (*[]*pb.Menu, error)
 		return nil, err
 	}
 	menus := make([]*pb.Menu, 0)
+	glog.Infof("Parsing menus for %s", diningHall.Name)
 	for _, m := range reply.Menu {
 		if m == nil {
 			// TODO: Why nil?
@@ -125,7 +126,7 @@ func (m *MDiningClient) GetMenuDetails(diningHall *pb.DiningHall) (*mdiningapi.G
 	params := make(url.Values)
 	params.Add("_type", "json")
 	params.Add("diningHall", diningHall.Name)
-	url := DiningHallMenuDetailsBaseUrl
+	url := *DiningHallMenuDetailsBaseUrl
 	url.RawQuery = params.Encode()
 	reply := mdiningapi.GetMenuDetailsReply{}
 	glog.Infof("GetMenuDetails %s %s", diningHall.Name, url)

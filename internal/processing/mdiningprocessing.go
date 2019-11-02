@@ -32,18 +32,35 @@ func ItemsToFilterableEntries(items *pb.Items) *pb.FilterableEntries {
 func FoodsToItems(foods *[]*pb.Food) *pb.Items {
 	items := pb.Items{Items: map[string]*pb.Item{}}
 	for _, food := range *foods {
-		i := pb.Item{
-			Name: food.Name,
-			Attributes: food.MenuItem.Attribute,
+		item, exists := items.Items[food.Key]
+		if !exists {
+			item = &pb.Item{
+				Name: food.Name,
+				Attributes: food.MenuItem.Attribute,
+			}
+			item.DiningHallMatches = make(map[string]*pb.Item_DiningHallMatch)
+			item.DiningHallMatchesArray = make([]*pb.Item_DiningHallMatch, 0, len(food.DiningHallMatch))
+			items.Items[food.Key] = item
 		}
-		i.DiningHallMatches = make(map[string]*pb.Item_DiningHallMatch)
-		i.DiningHallMatchesArray = make([]*pb.Item_DiningHallMatch, 0, len(food.DiningHallMatch))
 		for _, match := range food.DiningHallMatch {
-			itemMatch := FoodDiningHallMatchToDiningHallMatch(match)
-			i.DiningHallMatches[match.Name] = itemMatch
-			i.DiningHallMatchesArray = append(i.DiningHallMatchesArray, itemMatch)
+			itemMatch, exists := item.DiningHallMatches[match.Name]
+			if !exists {
+				itemMatch = &pb.Item_DiningHallMatch {
+					Name: match.Name,
+					MealTimes: map[string]*pb.MealTime{},
+					MealTimesArray: []*pb.MealTime{},
+				}
+				item.DiningHallMatches[match.Name] = itemMatch
+				item.DiningHallMatchesArray = append(item.DiningHallMatchesArray, itemMatch)
+			}
+			for key, value := range match.MealTime {
+				_, exists := itemMatch.MealTimes[key]
+				if !exists {
+					itemMatch.MealTimes[key] = value
+					itemMatch.MealTimesArray = append(itemMatch.MealTimesArray, value)
+				}
+			}
 		}
-		items.Items[food.Name] = &i
 	}
 	return &items
 }
@@ -75,18 +92,27 @@ func MenusToFoods(menus *[]proto.Message) ([]proto.Message, error) {
 					glog.Warningf("MenuItem is nil for category %s in menu %s", cat.Name, m.DiningHallMeal+m.Date)
 					continue
 				}
-				food, exists := foods[menuItem.Name]
+				food, exists := foods[menuItem.Name + m.Date]
 				if !exists {
-					foods[menuItem.Name] = &pb.Food{
+					foods[menuItem.Name + m.Date] = &pb.Food{
 						Key:             strings.ToLower(menuItem.Name),
 						Date:            m.Date,
 						Name:            menuItem.Name,
-						Category:        cat.Name,
+						Category:        []string{},
 						MenuItem:        menuItem,
 						DiningHallMatch: map[string]*pb.FoodDiningHallMatch{}}
-					food, _ = foods[menuItem.Name]
+					food, _ = foods[menuItem.Name + m.Date]
 				}
 				f := food.(*pb.Food)
+				containsCategory := false
+				for _, c := range f.Category {
+					if c == cat.Name {
+						containsCategory = true
+					}
+				}
+				if !containsCategory {
+					f.Category = append(f.Category, cat.Name)
+				}
 				var match *pb.FoodDiningHallMatch
 				match, exists = f.DiningHallMatch[m.DiningHallName]
 				if !exists {

@@ -93,6 +93,7 @@ func (d *DynamoClient) QueryFoodsDateRange(name *string, startDate *string, endD
 	err := d.ForEachFood(startDate, endDate, func(food *pb.Food) {
 		foods = append(foods, food)
 	})
+	glog.Info(len(foods))
 	if err != nil {
 		return nil, err
 	}

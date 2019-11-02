@@ -63,7 +63,9 @@ func main() {
 		timesServed := countTimesServed(food)
 		foodStats.TotalFoodMealsServed += timesServed
 		foodStats.TimesServed[food.Key] += timesServed
-		foodStats.CategoryCounts[food.Category] += timesServed
+		for _, cat := range food.Category {
+			foodStats.CategoryCounts[cat] += timesServed
+		}
 		_, e := foodStats.FoodWeekdayCounts[food.Key]
 		if !e {
 			foodStats.FoodWeekdayCounts[food.Key] = &pb.IntToInt{Data: make(map[int64]int64)}
