@@ -96,7 +96,9 @@ func (s *Server) GetFilterableEntries(ctx context.Context, req *pb.FilterableEnt
 
 func (s *Server) GetAll(ctx context.Context, req *pb.AllRequest) (*pb.AllReply, error) {
 	glog.Infof("GetAll req{%v}", req)
-	return &pb.AllReply{DiningHalls: s.diningHalls.DiningHalls, Items: s.items.Items, FilterableEntries: s.filterableEntries.FilterableEntries}, nil
+	reply := pb.AllReply{DiningHalls: s.diningHalls.DiningHalls, Items: s.items.Items, FilterableEntries: s.filterableEntries.FilterableEntries}
+	defer glog.Infof("GetAll res{Items: %d, FilterableEntries: %d, DiningHalls: %d}", len(reply.Items), len(reply.FilterableEntries), len(reply.DiningHalls))
+	return &reply, nil
 }
 
 func (s *Server) GetMenu(ctx context.Context, req *pb.MenuRequest) (*pb.MenuReply, error) {
@@ -148,4 +150,9 @@ func (s *Server) GetFood(ctx context.Context, req *pb.FoodRequest) (*pb.FoodRepl
 	}
 	glog.Infof("GetFood res{%d foods}", len(*foods))
 	return &pb.FoodReply{Foods: *foods}, nil
+}
+
+func (s *Server) GetFoodStats(ctx context.Context, req *pb.FoodStatsRequest) (*pb.FoodStatsReply, error) {
+	glog.Infof("GetFoodStats req{%v}", req)
+	return &pb.FoodStatsReply{FoodStats: *s.foodStats}, nil
 }

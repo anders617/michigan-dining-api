@@ -8,6 +8,7 @@ import "api/proto/items.proto";
 import "api/proto/filterableentries.proto";
 import "api/proto/menu.proto";
 import "api/proto/food.proto";
+import "api/proto/foodstat.proto";
 
 service MDining {
   rpc GetDiningHalls(DiningHallsRequest) returns (DiningHallsReply) {
@@ -46,7 +47,16 @@ service MDining {
       get: "/v1/foods"
     };
   }
+
+  rpc GetFoodStats(FoodStatsRequest) returns (FoodStatsReply) {
+    option (google.api.http) = {
+      get: "/v1/stats"
+    };
+  }
 }
+
+message FoodStatsRequest {}
+message FoodStatsReply { repeated FoodStat foodStats = 1; }
 
 message DiningHallsRequest {}
 
