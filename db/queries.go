@@ -12,9 +12,24 @@ import (
 	"github.com/golang/glog"
 )
 
-func (d *DynamoClient) ForEachFood(fn func(*pb.Food)) error {
+func (d *DynamoClient) ForEachFood(startDate *string, endDate *string, fn func(*pb.Food)) error {
+	var filter expression.ConditionBuilder
+	if startDate != nil && endDate != nil {
+		filter = expression.Name("date").Between(expression.Value(*startDate), expression.Value(*endDate))
+	} else if startDate != nil {
+		filter = expression.Name("date").GreaterThanEqual(expression.Value(*startDate))
+	} else if endDate != nil {
+		filter = expression.Name("date").LessThanEqual(expression.Value(*endDate))
+	}
 	params := &dynamodb.ScanInput{
 		TableName: aws.String(FoodTableName),
+	}
+	if startDate != nil || endDate != nil {
+		glog.Info(*startDate)
+		expr, _ := expression.NewBuilder().WithFilter(filter).Build()
+		params.FilterExpression = expr.Filter()
+		params.ExpressionAttributeNames = expr.Names()
+		params.ExpressionAttributeValues = expr.Values()
 	}
 	req := d.client.ScanRequest(params)
 	p := dynamodb.NewScanPaginator(req)
@@ -74,7 +89,14 @@ func (d *DynamoClient) QueryFoodsDateRange(name *string, startDate *string, endD
 		}
 		return d.queryFoods(params)
 	}
-	return nil, errors.New("Unimplemented Foods DateRange Query")
+	foods := make([]*pb.Food, 0)
+	err := d.ForEachFood(startDate, endDate, func(food *pb.Food) {
+		foods = append(foods, food)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &foods, nil
 }
 
 func (d *DynamoClient) QueryFoods(name *string, date *string) (*[]*pb.Food, error) {

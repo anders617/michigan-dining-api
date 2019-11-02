@@ -11,6 +11,9 @@ proto_library(
     name = "items_proto",
     srcs = ["items.proto"],
     visibility = ["//visibility:public"],
+    deps = [
+        ":food_proto",
+    ]
 )
 
 proto_library(

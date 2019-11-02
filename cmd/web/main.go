@@ -11,7 +11,8 @@ import (
 
 	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/db/dynamoclient"
-	"github.com/MichiganDiningAPI/internal/util/io"
+	"github.com/MichiganDiningAPI/internal/processing/mdiningprocessing"
+	"github.com/MichiganDiningAPI/internal/util/date"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/soheilhy/cmux"
@@ -19,9 +20,9 @@ import (
 )
 
 var wg sync.WaitGroup
-var mockDiningHalls pb.DiningHalls
-var mockItems pb.Items
-var mockFilterableEntries pb.FilterableEntries
+var mockDiningHalls *pb.DiningHalls = &pb.DiningHalls{}
+var mockItems *pb.Items = &pb.Items{}
+var mockFilterableEntries *pb.FilterableEntries = &pb.FilterableEntries{}
 
 const proxiedGrpcPort = "3000"
 
@@ -40,7 +41,7 @@ func NewServer() *server {
 func (s *server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest) (*pb.DiningHallsReply, error) {
 	glog.Infof("GetDiningHalls req{%v}", req)
 	// Currently just returns static dining halls data that's checked into git
-	return &pb.DiningHallsReply{DiningHalls: &mockDiningHalls}, nil
+	return &pb.DiningHallsReply{DiningHalls: mockDiningHalls.DiningHalls}, nil
 }
 
 //
@@ -48,17 +49,17 @@ func (s *server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest)
 //
 func (s *server) GetItems(ctx context.Context, req *pb.ItemsRequest) (*pb.ItemsReply, error) {
 	glog.Infof("GetItems req{%v}", req)
-	return &pb.ItemsReply{Items: &mockItems}, nil
+	return &pb.ItemsReply{Items: mockItems.Items}, nil
 }
 
 func (s *server) GetFilterableEntries(ctx context.Context, req *pb.FilterableEntriesRequest) (*pb.FilterableEntriesReply, error) {
 	glog.Infof("GetFilterableEntries req{%v}", req)
-	return &pb.FilterableEntriesReply{FilterableEntries: &mockFilterableEntries}, nil
+	return &pb.FilterableEntriesReply{FilterableEntries: mockFilterableEntries.FilterableEntries}, nil
 }
 
 func (s *server) GetAll(ctx context.Context, req *pb.AllRequest) (*pb.AllReply, error) {
 	glog.Infof("GetAll req{%v}", req)
-	return &pb.AllReply{DiningHalls: &mockDiningHalls, Items: &mockItems, FilterableEntries: &mockFilterableEntries}, nil
+	return &pb.AllReply{DiningHalls: mockDiningHalls.DiningHalls, Items: mockItems.Items, FilterableEntries: mockFilterableEntries.FilterableEntries}, nil
 }
 
 func (s *server) GetMenu(ctx context.Context, req *pb.MenuRequest) (*pb.MenuReply, error) {
@@ -141,18 +142,31 @@ func main() {
 	wg.Add(2)
 
 	dc := dynamoclient.New()
-	_, err := dc.QueryDiningHalls()
+	var err error
+	mockDiningHalls, err = dc.QueryDiningHalls()
 	if err != nil {
-		glog.Fatalf("QueryDIningHalls err %s", err)
+		glog.Fatalf("QueryDiningHalls err %s", err)
 	}
 	glog.Infof("QueryDiningHalls Success")
 
-	glog.Infof("Reading api/proto/sample/dininghalls.proto.txt")
-	util.ReadProtoFromFile("api/proto/sample/dininghalls.proto.txt", &mockDiningHalls)
-	glog.Infof("Reading api/proto/sample/items.proto.txt")
-	util.ReadProtoFromFile("api/proto/sample/items.proto.txt", &mockItems)
-	glog.Infof("Reading api/proto/sample/filterableentries.proto.txt")
-	util.ReadProtoFromFile("api/proto/sample/filterableentries.proto.txt", &mockFilterableEntries)
+	var foods *[]*pb.Food
+	// Get all foods after today
+	startDate := date.Format(date.DayStart(date.Now()))
+	foods, err = dc.QueryFoodsDateRange(nil, &startDate, nil)
+	if err != nil {
+		glog.Fatalf("QueryFoodsDateRange err %s", err)
+	}
+	glog.Infof("QueryFoodsDateRange Success")
+	mockItems = mdiningprocessing.FoodsToItems(foods)
+
+	mockFilterableEntries = mdiningprocessing.ItemsToFilterableEntries(mockItems)
+
+	// glog.Infof("Reading api/proto/sample/dininghalls.proto.txt")
+	// util.ReadProtoFromFile("api/proto/sample/dininghalls.proto.txt", &mockDiningHalls)
+	// glog.Infof("Reading api/proto/sample/items.proto.txt")
+	// util.ReadProtoFromFile("api/proto/sample/items.proto.txt", mockItems)
+	// glog.Infof("Reading api/proto/sample/filterableentries.proto.txt")
+	// util.ReadProtoFromFile("api/proto/sample/filterableentries.proto.txt", mockFilterableEntries)
 
 	// go serveGRPC(port)
 	// go serveHTTP(port)

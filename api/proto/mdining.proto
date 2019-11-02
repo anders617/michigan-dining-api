@@ -50,15 +50,15 @@ service MDining {
 
 message DiningHallsRequest {}
 
-message DiningHallsReply { DiningHalls diningHalls = 1; }
+message DiningHallsReply { repeated DiningHall diningHalls = 1; }
 
 message ItemsRequest {}
 
-message ItemsReply { Items items = 1; }
+message ItemsReply { map<string, Item> items = 1; }
 
 message FilterableEntriesRequest {}
 
-message FilterableEntriesReply { FilterableEntries filterableEntries = 1; }
+message FilterableEntriesReply { repeated FilterableEntry filterableEntries = 1; }
 
 message AllRequest {}
 
@@ -82,7 +82,7 @@ message FoodReply {
 }
 
 message AllReply {
-  DiningHalls diningHalls = 1;
-  Items items = 2;
-  FilterableEntries filterableEntries = 3;
+  repeated DiningHall diningHalls = 1;
+  map<string, Item> items = 2;
+  repeated FilterableEntry filterableEntries = 3;
 }

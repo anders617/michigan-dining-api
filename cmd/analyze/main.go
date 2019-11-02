@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"time"
 
 	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/db/dynamoclient"
@@ -45,7 +44,7 @@ func main() {
 	// weekdayFoodCounts := make(map[time.Weekday]map[string]int)
 
 	foodStats := &pb.FoodStat{
-		Date:                  date.Format(time.Now()),
+		Date:                  date.Format(date.Now()),
 		TimesServed:           map[string]int64{},
 		FoodDiningHallCounts:  map[string]*pb.StringToInt{},
 		DiningHallFoodCounts:  map[string]*pb.StringToInt{},
@@ -60,7 +59,7 @@ func main() {
 	}
 	glog.Infof("%v", foodStats)
 
-	dc.ForEachFood(func(food *pb.Food) {
+	dc.ForEachFood(nil, nil, func(food *pb.Food) {
 		timesServed := countTimesServed(food)
 		foodStats.TotalFoodMealsServed += timesServed
 		foodStats.TimesServed[food.Key] += timesServed
