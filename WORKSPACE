@@ -169,3 +169,24 @@ go_repository(
     sum = "h1:2EkzeTSqBB4V4bJwWrt5gIIrZmpJBcoIRGS2kWLgzmk=",
     version = "v0.5.0",
 )
+
+go_repository(
+    name = "com_github_improbable_eng_grpc_web",
+    importpath = "github.com/improbable-eng/grpc-web",
+    sum = "h1:drkI/L8GnHWtWeAZFB7bEUQz9bZqOf/X8Dhvsm2uV7Y=",
+    version = "v0.11.0",
+)
+
+go_repository(
+    name = "com_github_gorilla_websocket",
+    importpath = "github.com/gorilla/websocket",
+    sum = "h1:q7AeDBpnBk8AogcD4DSag/Ukw/KV+YhzLj2bP5HvKCM=",
+    version = "v1.4.1",
+)
+
+go_repository(
+    name = "com_github_rs_cors",
+    importpath = "github.com/rs/cors",
+    sum = "h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=",
+    version = "v1.7.0",
+)

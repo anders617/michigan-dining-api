@@ -12,9 +12,14 @@ import (
 	"github.com/MichiganDiningAPI/internal/web/mdiningserver"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 )
+
+//
+// Launches a mdining-api server that handles http/rest, grpc, and grpc-web requests
+//
 
 const proxiedGrpcPort = "3000"
 
@@ -83,8 +88,19 @@ func main() {
 	defer cancel()
 	// Set the address to forward requests to to grpcAddr
 	err = pb.RegisterMDiningHandlerFromEndpoint(ctx, mux, "localhost:"+proxiedGrpcPort, opts)
+	grpcServer := grpc.NewServer()
+	// Wrap it in a grpcweb handler in order to also serve grpc-web requests
+	wrappedGrpc := grpcweb.WrapServer(grpcServer)
+	grpcWebHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		if wrappedGrpc.IsGrpcWebRequest(req) {
+			wrappedGrpc.ServeHTTP(resp, req)
+			return
+		}
+		// Fall back to other servers.
+		mux.ServeHTTP(resp, req)
+	})
 	httpS := &http.Server{
-		Handler: allowCORS(mux),
+		Handler: allowCORS(grpcWebHandler),
 	}
 
 	// Use the muxed listeners for your servers.

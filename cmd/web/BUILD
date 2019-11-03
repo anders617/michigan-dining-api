@@ -16,7 +16,8 @@ go_library(
         "@com_github_golang_protobuf//proto:go_default_library",
         "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
-        "@com_github_soheilhy_cmux//:go_default_library"
+        "@com_github_soheilhy_cmux//:go_default_library",
+        "@com_github_improbable_eng_grpc_web//go/grpcweb:go_default_library",
     ],
 )
 
