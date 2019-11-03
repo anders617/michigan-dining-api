@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/dynamodbattribute"

@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/internal/web/mdiningserver"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"

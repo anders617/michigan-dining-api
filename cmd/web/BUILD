@@ -6,12 +6,12 @@ go_library(
     importpath = "github.com/MichiganDiningAPI/cmd/web",
     visibility = ["//visibility:private"],
     deps = [
-        "//api/proto:go_default_library",
         "//internal/util:io",
         "//internal/util:date",
         "//internal/processing:mdiningprocessing",
         "//internal/web:mdiningserver",
         "//db:dynamoclient",
+        "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
         "@com_github_golang_glog//:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
         "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
@@ -24,7 +24,7 @@ go_library(
 go_binary(
     name = "web",
     data = [
-        "//api/proto/sample:proto_sample_data",
+        "@com_github_anders617_mdining_proto//proto/sample:proto_sample_data",
     ],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],

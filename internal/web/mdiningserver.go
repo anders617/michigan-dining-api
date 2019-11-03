@@ -5,10 +5,10 @@ import (
 	"sync"
 	"time"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/db/dynamoclient"
 	"github.com/MichiganDiningAPI/internal/processing/mdiningprocessing"
 	"github.com/MichiganDiningAPI/internal/util/date"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
 )
 

@@ -6,9 +6,9 @@ go_library(
     importpath = "github.com/MichiganDiningAPI/api/mdining/mdiningclient",
     visibility = ["//visibility:public"],
     deps = [
-        "//api/proto:go_default_library",
-        "//api/proto:mdiningapi_proto_library",
         "//internal/util:date",
+        "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
+        "@com_github_anders617_mdining_proto//proto:mdiningapi_go_proto",
         "@com_github_aws_aws_sdk_go_v2//aws:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/endpoints:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/external:go_default_library",

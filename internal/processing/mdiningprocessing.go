@@ -3,7 +3,7 @@ package mdiningprocessing
 import (
 	"strings"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/MichiganDiningAPI/internal/util/containers"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"

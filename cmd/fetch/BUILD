@@ -8,10 +8,10 @@ go_library(
     deps = [
         "//internal/processing:mdiningprocessing",
         "//db:dynamoclient",
-        "//api/proto:go_default_library",
         "//api/mdining:mdiningclient",
         "//internal/util:io",
         "//internal/util:containers",
+        "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
         "@com_github_aws_aws_sdk_go_v2//aws:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/endpoints:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/external:go_default_library",
@@ -25,7 +25,7 @@ go_library(
 
 go_binary(
     name = "fetch",
-    data = ["//api/proto/sample:proto_sample_data"],
+    data = ["@com_github_anders617_mdining_proto//proto/sample:proto_sample_data",],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )

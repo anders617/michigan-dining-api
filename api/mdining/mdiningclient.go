@@ -11,9 +11,9 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
-	"github.com/MichiganDiningAPI/api/proto/mdiningapi"
 	"github.com/MichiganDiningAPI/internal/util/date"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
+	"github.com/anders617/mdining-proto/proto/mdiningapi"
 )
 
 const (

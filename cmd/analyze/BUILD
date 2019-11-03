@@ -6,11 +6,11 @@ go_library(
     importpath = "github.com/MichiganDiningAPI/cmd/web",
     visibility = ["//visibility:private"],
     deps = [
-        "//api/proto:go_default_library",
         "//internal/util:io",
         "//internal/util:containers",
         "//internal/util:date",
         "//db:dynamoclient",
+        "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
         "@com_github_montanaflynn_stats//:go_default_library",
         "@com_github_golang_glog//:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",

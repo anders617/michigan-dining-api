@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 
-	pb "github.com/MichiganDiningAPI/api/proto"
 	"github.com/MichiganDiningAPI/db/dynamoclient"
 	containers "github.com/MichiganDiningAPI/internal/util/containers"
 	"github.com/MichiganDiningAPI/internal/util/date"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
 	"github.com/montanaflynn/stats"
 )

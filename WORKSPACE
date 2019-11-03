@@ -190,3 +190,10 @@ go_repository(
     sum = "h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=",
     version = "v1.7.0",
 )
+
+go_repository(
+    name = "com_github_anders617_mdining_proto",
+    importpath = "github.com/anders617/mdining-proto",
+    sum = "h1:hvdM0KSbqRTe6G04j4T5GAqi1IbLGq1Tqp6BDEz97Q0=",
+    version = "v0.0.2",
+)
