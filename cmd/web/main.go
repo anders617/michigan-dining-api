@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/MichiganDiningAPI/internal/web/mdiningserver"
 	pb "github.com/anders617/mdining-proto/proto/mdining"
@@ -21,12 +22,30 @@ import (
 // Launches a mdining-api server that handles http/rest, grpc, and grpc-web requests
 //
 
-const proxiedGrpcPort = "3000"
+const proxiedGrpcPort = "5982"
+
+// preflightHandler adds the necessary headers in order to serve
+// CORS from any origin using the methods "GET", "HEAD", "POST", "PUT", "DELETE"
+// We insist, don't do this without consideration in production systems.
+func preflightHandler(w http.ResponseWriter, r *http.Request) {
+	// headers := []string{"Content-Type", "Accept", "Authorization", "x-user-agent"}
+	w.Header().Set("Access-Control-Allow-Headers", "*") //strings.Join(headers, ","))
+	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
+	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
+	glog.Infof("preflight request for %s", r.URL.Path)
+}
 
 // allowCORS allows Cross Origin Resoruce Sharing from any origin.
 func allowCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if origin := r.Header.Get("Origin"); origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			if r.Method == "OPTIONS" && r.Header.Get("Access-Control-Request-Method") != "" {
+				preflightHandler(w, r)
+				return
+			}
+		}
+		glog.Infof("serving http for %s", r.URL.Path)
 		h.ServeHTTP(w, r)
 	})
 }
@@ -89,8 +108,10 @@ func main() {
 	// Set the address to forward requests to to grpcAddr
 	err = pb.RegisterMDiningHandlerFromEndpoint(ctx, mux, "localhost:"+proxiedGrpcPort, opts)
 	grpcServer := grpc.NewServer()
+	// Register Server
+	pb.RegisterMDiningServer(grpcServer, mDiningServer)
 	// Wrap it in a grpcweb handler in order to also serve grpc-web requests
-	wrappedGrpc := grpcweb.WrapServer(grpcServer)
+	wrappedGrpc := grpcweb.WrapServer(grpcServer, grpcweb.WithAllowedRequestHeaders([]string{"*"}))
 	grpcWebHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
