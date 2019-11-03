@@ -25,7 +25,10 @@ func (d *DynamoClient) QueryFoodStats() (*[]*pb.FoodStat, error) {
 	foodStats := make([]*pb.FoodStat, 0)
 	for _, i := range result.Items {
 		stat := pb.FoodStat{}
-		dynamodbattribute.UnmarshalMap(i, &stat)
+		err := dynamodbattribute.UnmarshalMap(i, &stat)
+		if err != nil {
+			return nil, err
+		}
 		foodStats = append(foodStats, &stat)
 	}
 	return &foodStats, nil

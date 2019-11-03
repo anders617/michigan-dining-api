@@ -69,6 +69,9 @@ func (s *Server) fetchFoodStats(wg *sync.WaitGroup) {
 	if err != nil {
 		glog.Fatalf("QueryFoodStats err %s", err)
 	}
+	for _, stat := range *s.foodStats {
+		glog.Infof("Date %s", stat.Date)
+	}
 	glog.Infof("QueryFoodStats Success")
 }
 

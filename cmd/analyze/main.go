@@ -38,15 +38,15 @@ func updateStats(foodStats *pb.FoodStat, food *pb.Food) {
 	}
 	_, e := foodStats.FoodWeekdayCounts[food.Key]
 	if !e {
-		foodStats.FoodWeekdayCounts[food.Key] = &pb.IntToInt{Data: make(map[int64]int64)}
+		foodStats.FoodWeekdayCounts[food.Key] = &pb.StringToInt{Data: make(map[string]int64)}
 	}
 	d, _ := date.ParseNoTime(&food.Date)
-	foodStats.FoodWeekdayCounts[food.Key].Data[int64(d.Weekday())] += timesServed
-	_, e = foodStats.WeekdayFoodCounts[int64(d.Weekday())]
+	foodStats.FoodWeekdayCounts[food.Key].Data[d.Weekday().String()] += timesServed
+	_, e = foodStats.WeekdayFoodCounts[d.Weekday().String()]
 	if !e {
-		foodStats.WeekdayFoodCounts[int64(d.Weekday())] = &pb.StringToInt{Data: make(map[string]int64)}
+		foodStats.WeekdayFoodCounts[d.Weekday().String()] = &pb.StringToInt{Data: make(map[string]int64)}
 	}
-	foodStats.WeekdayFoodCounts[int64(d.Weekday())].Data[food.Key] += timesServed
+	foodStats.WeekdayFoodCounts[d.Weekday().String()].Data[food.Key] += timesServed
 	_, e = foodStats.FoodDiningHallCounts[food.Key]
 	if !e {
 		foodStats.FoodDiningHallCounts[food.Key] = &pb.StringToInt{Data: make(map[string]int64)}
@@ -85,8 +85,8 @@ func NewFoodStat(date string) *pb.FoodStat {
 		CategoryCounts:        map[string]int64{},
 		AllergenCounts:        map[string]int64{},
 		AttributeCounts:       map[string]int64{},
-		WeekdayFoodCounts:     map[int64]*pb.StringToInt{},
-		FoodWeekdayCounts:     map[string]*pb.IntToInt{},
+		WeekdayFoodCounts:     map[string]*pb.StringToInt{},
+		FoodWeekdayCounts:     map[string]*pb.StringToInt{},
 		NumUniqueFoods:        0,
 		TotalFoodMealsServed:  0,
 		DiningHallMealsServed: map[string]int64{},
