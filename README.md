@@ -62,5 +62,6 @@ You can click each link for an example \
 [/v1/filterableEntries](https://michigan-dining-api.herokuapp.com/v1/filterableEntries) \
 [/v1/all](https://michigan-dining-api.herokuapp.com/v1/all) \
 [/v1/menus?date={yyyy-MM-dd}&diningHall={DINING_HALL}&meal={MEAL}](https://michigan-dining-api.herokuapp.com/v1/menus?date=2019-11-04&diningHall=Bursley%20Dining%20Hall&meal=LUNCH) \
+[/v1/foods?name={LOWERCASE_FOOD_NAME}&date={DATE}&meal={MEAL}](https://michigan-dining-api/herokuapp.com/v1/foods?name=chicken%20tenders&date=2019-11-08&meal=DINNER) \
 [/v1/stats](https://michigan-dining-api.herokuapp.com/v1/stats)
 
