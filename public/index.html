@@ -1,0 +1,68 @@
+<html>
+
+<head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>michigan-dining-api</title>
+    <meta name="description="
+        content="API for retrieving information about University of Michigan dining halls. Foods, menus, location info and more.">
+</head>
+
+<body>
+    <main>
+        <article>
+            <header>
+                <h1>michigan-dining-api</h1>
+                <p>
+                    This API serves information about the University of Michigan's Dining Halls.
+                </p>
+            </header>
+            <section>
+                <h2>About</h2>
+                <p>
+                    The project is located on github <a href="https://github.com/anders617/michigan-dining-api"
+                        target="_blank" rel="noopener noreferrer">here</a>.
+                    </br>
+                    Currently this is used to support <a href="https://tendiesti.me" target="_blank"
+                        rel="noopener noreferrer">tendiesti.me</a>.
+                    </br>
+                    This API can be accessed through <a href="https://grpc.io/" target="_blank"
+                        rel="noopener noreferrer">grpc</a>, <a href="https://github.com/grpc/grpc-web" target="_blank"
+                        rel="noopener noreferrer">grpc-web</a>, or a REST API.
+                    </br>
+                    To access the API through grpc and grpc-web, use the proto service defininitions in <a
+                        href="https://github.com/anders617/mdining-proto" target="_blank"
+                        rel="noopener noreferrer">mdining-proto</a>.
+                </p>
+            </section>
+            <section>
+                <h2>REST Endpoints</h2>
+                <p>
+                    Here is a list of REST JSON endpoints that exists as of writing:
+                    <ul style="list-style: none;">
+                        <li>
+                            <a href="/v1/all">/v1/all</a>
+                        </li>
+                        <li>
+                            <a href="/v1/diningHalls">/v1/diningHalls</a>
+                        </li>
+                        <li>
+                            <a href="/v1/items">/v1/items</a>
+                        </li>
+                        <li>
+                            <a href="/v1/filterableEntries">/v1/filterableEntries</a>
+                        </li>
+                        <li>
+                            <a href="/v1/menus?date=2019-11-07">/v1/menus</a>
+                        </li>
+                        <li>
+                            <a href="/v1/stats">/v1/stats</a>
+                        </li>
+                    </ul>
+                </p>
+            </section>
+        </article>
+    </main>
+</body>
+
+</html>

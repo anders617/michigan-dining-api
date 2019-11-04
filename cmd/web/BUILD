@@ -24,7 +24,7 @@ go_library(
 go_binary(
     name = "web",
     data = [
-        "@com_github_anders617_mdining_proto//proto/sample:proto_sample_data",
+        "//public:public_files",
     ],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],

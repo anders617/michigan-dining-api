@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -76,6 +77,17 @@ func main() {
 	}
 	flag.Parse()
 
+	// Read index.html and favicon.ico into memory
+	indexHTML, e := ioutil.ReadFile("public/index.html")
+	if e != nil {
+		glog.Fatalf("Error reading public/index.html %s", e)
+	}
+	var favicon []byte
+	favicon, e = ioutil.ReadFile("public/favicon.ico")
+	if e != nil {
+		glog.Fatalf("Error reading public/favicon.ico", e)
+	}
+
 	mDiningServer := mdiningserver.New()
 
 	// Create the main listener.
@@ -101,6 +113,7 @@ func main() {
 
 	// HTTP
 	mux := runtime.NewServeMux()
+
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -115,6 +128,15 @@ func main() {
 	grpcWebHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
+			return
+		}
+		if req.URL.Path == "/" {
+			resp.Write(indexHTML)
+			return
+		}
+		if req.URL.Path == "/favicon.ico" {
+			resp.Header().Set("Content-Type", "image/x-icon")
+			resp.Write(favicon)
 			return
 		}
 		// Fall back to other servers.
