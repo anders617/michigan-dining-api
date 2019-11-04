@@ -1,5 +1,5 @@
 # michigan-dining-api
-[![Build Status](https://travis-ci.com/anders617/michigan-dining-api.svg?token=cMRcZeh9VAjpBXRsmo8P&branch=master)](https://travis-ci.com/anders617/michigan-dining-api)
+[![Build Status](https://travis-ci.org/anders617/michigan-dining-api.svg?branch=master)](https://travis-ci.org/anders617/michigan-dining-api)
 
 [michigan-dining-api.herokuapp.com](http://michigan-dining-api.herokuapp.com/)
 
