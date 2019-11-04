@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <main>
+    <main style="max-width: 650px;">
         <article>
             <header>
                 <h1>michigan-dining-api</h1>
@@ -36,9 +36,23 @@
                 </p>
             </section>
             <section>
+                <h2>GRPC</h2>
+                <p>
+                    This service was built with grpc in mind. Queries through grpc to this service will be significantly
+                    faster than thier REST counterparts since REST requests are just proxied to grpc queries and
+                    therefore require serialization and deserialization between protobufs and JSON.
+                </p>
+            </section>
+            <section>
                 <h2>REST Endpoints</h2>
                 <p>
-                    Here is a list of REST JSON endpoints that exists as of writing:
+                    REST Endpoints still return data according to the service definitions in <a
+                        href="https://github.com/anders617/mdining-proto" target="_blank"
+                        rel="noopener noreferrer">mdining-proto</a>, but the responses will be serialized in JSON
+                    instead of binary protobuf formats.
+                </br>
+                </br>
+                    Here is a list of REST JSON endpoints that exist as of writing:
                     <ul style="list-style: none;">
                         <li>
                             <a href="/v1/all">/v1/all</a>
@@ -63,6 +77,16 @@
             </section>
         </article>
     </main>
+    <footer>
+    <p>
+        Problems? Want to contribute? Create an issue on the
+        <a href="https://github.com/anders617/michigan-dining-api"
+            target="_blank" rel="noopener noreferrer">github</a> page.
+    </p>
+    <p>
+        &copy; 2019 Anders Boberg
+    </p>
+    </footer>
 </body>
 
 </html>
