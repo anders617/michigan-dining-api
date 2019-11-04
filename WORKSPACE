@@ -197,3 +197,10 @@ go_repository(
     sum = "h1:9mJByZxVaLaZ0KkonehnnkPpBf8vcFYW/lufanh97vw=",
     version = "v0.0.5",
 )
+
+go_repository(
+    name = "com_github_google_uuid",
+    importpath = "github.com/google/uuid",
+    sum = "h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=",
+    version = "v1.1.1",
+)

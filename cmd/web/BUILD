@@ -10,6 +10,7 @@ go_library(
         "//internal/util:date",
         "//internal/processing:mdiningprocessing",
         "//internal/web:mdiningserver",
+        "//api/analytics:analyticsclient",
         "//db:dynamoclient",
         "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
         "@com_github_golang_glog//:go_default_library",

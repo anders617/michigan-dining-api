@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MichiganDiningAPI/api/analytics/analyticsclient"
 	"github.com/MichiganDiningAPI/internal/web/mdiningserver"
 	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
@@ -24,6 +25,8 @@ import (
 //
 
 const proxiedGrpcPort = "5982"
+
+var analytics *analyticsclient.AnalyticsClient = analyticsclient.New()
 
 // preflightHandler adds the necessary headers in order to serve
 // CORS from any origin using the methods "GET", "HEAD", "POST", "PUT", "DELETE"
@@ -47,6 +50,8 @@ func allowCORS(h http.Handler) http.Handler {
 			}
 		}
 		glog.Infof("serving http for %s", r.URL.Path)
+		// Asynchronously send analytics
+		go analytics.SendHit(r)
 		h.ServeHTTP(w, r)
 	})
 }
