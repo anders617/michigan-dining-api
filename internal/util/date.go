@@ -36,3 +36,20 @@ func DayEnd(t time.Time) time.Time {
 func FormatNoTime(t time.Time) string {
 	return t.In(USEasternLocation).Format(MDiningDateNoTimeLayout)
 }
+
+func fetchTimeOnDate(t time.Time) time.Time {
+	utc := t.In(time.UTC)
+	return time.Date(utc.Year(), utc.Month(), utc.Day(), 6, 30, 0, 0, time.UTC).In(USEasternLocation)
+}
+
+func NextFetchTime() time.Time {
+	now := Now()
+	fetchTime := fetchTimeOnDate(now)
+	// If fetch time is still to come today, return it
+	if fetchTime.After(now) {
+		return fetchTime
+	}
+	// If fetch time has already happened, return tomorrow fetch time
+	return fetchTimeOnDate(now.AddDate(0, 0, 1))
+
+}
