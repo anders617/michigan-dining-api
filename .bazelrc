@@ -1,0 +1,2 @@
+# Use a remote cache to speed up builds
+build --remote_cache=http://michigan-dining-api.bazel-cache.andersboberg.com:5555
