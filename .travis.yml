@@ -2,7 +2,7 @@ dist: trusty
 
 cache:
     directories:
-     - /home/travis/bazel-cache
+      - /home/travis/bazel-cache
 
 addons:
   apt:
