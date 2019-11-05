@@ -53,6 +53,7 @@ In order to deploy your own server:
     * `AWS_SECRET_ACCESS_KEY` - Secret used for AWS DynamoDB access
     * `BAZEL_BUILD_PATH` - `//cmd:all`
     * `BAZEL_VERSION` - `1.1.0` (or later version)
+    * `BUILD_CACHE_LOCATION` - Address of a bazel remote cache server (optional)
 * Go to the deploy tab and click deploy branch
 
 ## Endpoints
