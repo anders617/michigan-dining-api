@@ -10,11 +10,15 @@ build --remote_cache=http://michigan-dining-api.bazel-cache.andersboberg.com:555
 # Write to cache to allow travis to do some caching
 build --disk_cache=/home/travis/bazel-cache
 
+# Write repos to cache that travis can save
+build --repository_cache=/home/travis/bazel-repo-cache
+
 # This is so we understand failures better
 build --verbose_failures
 
 # Prevent bazel from spamming travis output
 build --noshow_loading_progress
+build --noshow_progress
 
 # By default Bazel logs test failures to a log file. This option will print them to the screen instead.
 test --test_output=errors
