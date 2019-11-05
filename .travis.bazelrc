@@ -7,8 +7,17 @@ test --ram_utilization_factor=10
 # Use a remote cache to speed up builds
 build --remote_cache=http://michigan-dining-api.bazel-cache.andersboberg.com:5555
 
+# Write to cache to allow travis to do some caching
+build --disk_cache=/home/travis/bazel-cache
+
 # This is so we understand failures better
 build --verbose_failures
+
+# Prevent bazel from spamming travis output
+build --noshow_loading_progress
+
+# By default Bazel logs test failures to a log file. This option will print them to the screen instead.
+test --test_output=errors
 
 # This is so we don't use sandboxed execution. Sandboxed execution
 # runs stuff in a container, and since Travis already runs its script
