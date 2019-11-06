@@ -85,7 +85,7 @@ func (d *DynamoClient) PutProtoBatch(table *string, protos []proto.Message) erro
 				*table: reqs[startIdx:]}})
 		_, err := req.Send(context.Background())
 		if err != nil {
-			glog.Errorf("Error batch putting items %s", err)
+			glog.Errorf("Error batch putting %s %s", reflect.TypeOf(protos), err)
 			glog.Errorf("Retrying...")
 			time.Sleep(time.Second)
 			continue
