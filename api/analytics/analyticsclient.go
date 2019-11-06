@@ -66,8 +66,8 @@ func (ac *AnalyticsClient) SendHit(r *http.Request) {
 func getIPFromRemoteAddr(remoteAddr string) string {
 	comps := strings.Split(remoteAddr, ":")
 	if len(comps) != 2 {
-		// If the address is not parsable, just return a new user
-		return uuid.New().String()
+		// If the address is not parsable, just return localhost
+		return "localhost"
 	}
 	return comps[0]
 }
