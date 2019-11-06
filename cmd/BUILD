@@ -18,3 +18,8 @@ alias(
     name="analyze",
     actual="//cmd/analyze:analyze"
 )
+
+alias(
+    name="client",
+    actual="//cmd/client:client"
+)

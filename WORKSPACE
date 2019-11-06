@@ -17,6 +17,43 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
+# Download the rules_docker repository at release v0.12.1
+http_archive(
+    name = "io_bazel_rules_docker",
+    sha256 = "14ac30773fdb393ddec90e158c9ec7ebb3f8a4fd533ec2abbfd8789ad81a284b",
+    strip_prefix = "rules_docker-0.12.1",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.12.1/rules_docker-v0.12.1.tar.gz"],
+)
+
+load(
+    "@io_bazel_rules_docker//repositories:repositories.bzl",
+    container_repositories = "repositories",
+)
+container_repositories()
+
+load(
+    "@io_bazel_rules_docker//go:image.bzl",
+    _go_image_repos = "repositories",
+)
+_go_image_repos()
+
+# Load the macro that allows you to customize the docker toolchain configuration.
+load("@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
+    docker_toolchain_configure="toolchain_configure"
+)
+
+docker_toolchain_configure(
+  name = "docker_config",
+  # Replace this with an absolute path to a directory which has a custom docker
+  # client config.json. Note relative paths are not supported.
+  # Docker allows you to specify custom authentication credentials
+  # in the client configuration JSON file.
+  # See https://docs.docker.com/engine/reference/commandline/cli/#configuration-files
+  # for more details.
+  client_config="/Users/Anders/.docker/config.json",
+)
+
+
 http_archive(
     name = "bazel_gazelle",
     sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
