@@ -107,14 +107,8 @@ func main() {
 
 	// Match connections in order:
 	// First grpc, then HTTP, and otherwise Go RPC/TCP.
-	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	grpcL := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
 	httpL := m.Match(cmux.HTTP1Fast())
-
-	// Create your protocol servers.
-	grpcS := grpc.NewServer()
-
-	// Register Server
-	pb.RegisterMDiningServer(grpcS, mDiningServer)
 
 	// HTTP
 	mux := runtime.NewServeMux()
@@ -150,6 +144,12 @@ func main() {
 	httpS := &http.Server{
 		Handler: allowCORS(grpcWebHandler),
 	}
+
+	// Create your protocol servers.
+	grpcS := grpc.NewServer()
+
+	// Register Server
+	pb.RegisterMDiningServer(grpcS, mDiningServer)
 
 	// Use the muxed listeners for your servers.
 	// One GRPC server to handle proxied http requests
