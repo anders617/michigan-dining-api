@@ -52,6 +52,10 @@ func updateStats(foodStats *pb.FoodStat, food *pb.Food) {
 		foodStats.FoodDiningHallCounts[food.Key] = &pb.StringToInt{Data: make(map[string]int64)}
 	}
 	for dhName, dh := range food.DiningHallMatch {
+		if dh.Campus != "" && dh.Campus != "DINING HALLS" {
+			// For now, only analyze actual Dining Hall foods
+			continue
+		}
 		_, e = foodStats.DiningHallFoodCounts[dhName]
 		if !e {
 			foodStats.DiningHallFoodCounts[dhName] = &pb.StringToInt{Data: make(map[string]int64)}

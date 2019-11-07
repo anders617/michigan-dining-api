@@ -8,6 +8,7 @@ import (
 	dc "github.com/MichiganDiningAPI/db/dynamoclient"
 	"github.com/MichiganDiningAPI/internal/util/containers"
 	"github.com/MichiganDiningAPI/internal/processing/mdiningprocessing"
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
@@ -20,13 +21,24 @@ func main() {
 	dynamoclient := dc.New()
 	dynamoclient.CreateTablesIfNotExists()
 
-	dh, e := mdining.GetDiningHallList()
-	if e != nil {
-		glog.Fatalf("Failed to get dining hall list %s", e)
+	diningHallsByCampus, err := mdining.GetDiningHallList()
+	if err != nil {
+		glog.Fatalf("Failed to get dining hall list %s", err)
 	}
-	dynamoclient.PutProtoBatch(&dc.DiningHallsTableName, 
-		util.AsSliceType(dh.DiningHalls, []proto.Message{}).([]proto.Message))
-	menus, err := mdining.GetAllMenus(dh)
+	diningHallsList := []proto.Message{}
+	for campus, diningHalls := range *diningHallsByCampus {
+		glog.Infof("Received campus: %s", campus)
+		diningHallsList = append(diningHallsList, util.AsSliceType(diningHalls.DiningHalls, []proto.Message{}).([]proto.Message)...)
+	}
+	dynamoclient.PutProtoBatch(&dc.DiningHallsTableName, diningHallsList)
+	menus := []*pb.Menu{}
+	for _, diningHalls := range *diningHallsByCampus {
+		m, err := mdining.GetAllMenus(diningHalls)
+		if err != nil {
+			glog.Fatalf("Failed to get menus %s", err)
+		}
+		menus = append(menus, *m...)
+	}
 	menusProtoSlice := util.AsSliceType(menus, []proto.Message{}).([]proto.Message)
 	if err != nil {
 		glog.Fatalf("Failed to get menus %s", err)

@@ -44,6 +44,10 @@ func FoodsToItems(foods *[]*pb.Food) *pb.Items {
 		}
 		for _, match := range food.DiningHallMatch {
 			itemMatch, exists := item.DiningHallMatches[match.Name]
+			if match.Campus != "" && match.Campus != "DINING HALLS" {
+				// For legacy purposes, Item should only contain dining hall foods
+				continue
+			}
 			if !exists {
 				itemMatch = &pb.Item_DiningHallMatch {
 					Name: match.Name,
@@ -116,7 +120,7 @@ func MenusToFoods(menus *[]proto.Message) ([]proto.Message, error) {
 				var match *pb.FoodDiningHallMatch
 				match, exists = f.DiningHallMatch[m.DiningHallName]
 				if !exists {
-					match = &pb.FoodDiningHallMatch{Name: m.DiningHallName, MealTime: map[string]*pb.MealTime{}}
+					match = &pb.FoodDiningHallMatch{Name: m.DiningHallName, MealTime: map[string]*pb.MealTime{}, Campus: m.DiningHallCampus}
 					f.DiningHallMatch[m.DiningHallName] = match
 				}
 				var mealTime *pb.MealTime

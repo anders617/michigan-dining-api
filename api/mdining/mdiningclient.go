@@ -110,16 +110,17 @@ func (m *MDiningClient) GetMenus(diningHall *pb.DiningHall) (*[]*pb.Menu, error)
 		}
 		dateNoTime := date.FormatNoTime(dateTime)
 		menu := pb.Menu{
-			DiningHallMeal: diningHall.Name + m.Name,
-			Meal:           m.Name,
-			Date:           dateNoTime,
-			FormattedDate:  m.FormattedDate,
-			RatingCount:    m.RatingCount,
-			RatingScore:    m.RatingScore,
-			HasCategories:  m.HasCategories,
-			Description:    m.Description,
-			Category:       m.Category,
-			DiningHallName: diningHall.Name}
+			DiningHallMeal:   diningHall.Name + m.Name,
+			Meal:             m.Name,
+			Date:             dateNoTime,
+			FormattedDate:    m.FormattedDate,
+			RatingCount:      m.RatingCount,
+			RatingScore:      m.RatingScore,
+			HasCategories:    m.HasCategories,
+			Description:      m.Description,
+			Category:         m.Category,
+			DiningHallName:   diningHall.Name,
+			DiningHallCampus: diningHall.Campus}
 		menus = append(menus, &menu)
 	}
 	return &menus, nil
@@ -132,7 +133,7 @@ func (m *MDiningClient) GetMenuDetails(diningHall *pb.DiningHall) (*mdiningapi.G
 	url := *DiningHallMenuDetailsBaseUrl
 	url.RawQuery = params.Encode()
 	reply := mdiningapi.GetMenuDetailsReply{}
-	glog.Infof("GetMenuDetails %s %s", diningHall.Name, url)
+	glog.Infof("GetMenuDetails %s %s", diningHall.Name, url.String())
 	preprocess := func(s string) string {
 		// Sometimes mdining returns empty string instead of 0
 		// This messes with jsonpb unmarshalling since it expects an int
@@ -162,7 +163,7 @@ func (m *MDiningClient) GetMenuBase(diningHall *pb.DiningHall) (*mdiningapi.GetM
 	return &reply, nil
 }
 
-func (m *MDiningClient) GetDiningHallList() (*pb.DiningHalls, error) {
+func (m *MDiningClient) GetDiningHallList() (*map[string]*pb.DiningHalls, error) {
 	params := make(url.Values)
 	params.Add("_type", "json")
 	url := DiningHallListUrl
@@ -181,12 +182,15 @@ func (m *MDiningClient) GetDiningHallList() (*pb.DiningHalls, error) {
 	if err != nil {
 		return nil, err
 	}
-	diningHalls := pb.DiningHalls{}
+	diningHallsByCampus := make(map[string]*pb.DiningHalls)
 	for _, group := range reply.DiningHallGroup {
-		if group.Name == DiningHallGroupName {
-			diningHalls.DiningHalls = group.DiningHall
-			break
+		diningHalls := &pb.DiningHalls{DiningHalls: []*pb.DiningHall{}}
+		for _, diningHall := range group.DiningHall {
+			if diningHall.Name != "" {
+				diningHalls.DiningHalls = append(diningHalls.DiningHalls, diningHall)
+			}
 		}
+		diningHallsByCampus[group.Name] = diningHalls
 	}
-	return &diningHalls, nil
+	return &diningHallsByCampus, nil
 }

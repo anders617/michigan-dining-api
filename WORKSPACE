@@ -29,38 +29,40 @@ load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
+
 container_repositories()
 
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",
 )
+
 _go_image_repos()
 
 # Load the macro that allows you to customize the docker toolchain configuration.
-load("@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
-    docker_toolchain_configure="toolchain_configure"
+load(
+    "@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
+    docker_toolchain_configure = "toolchain_configure",
 )
 
 docker_toolchain_configure(
-  name = "docker_config",
-  # Replace this with an absolute path to a directory which has a custom docker
-  # client config.json. Note relative paths are not supported.
-  # Docker allows you to specify custom authentication credentials
-  # in the client configuration JSON file.
-  # See https://docs.docker.com/engine/reference/commandline/cli/#configuration-files
-  # for more details.
-  client_config="/Users/Anders/.docker/config.json",
+    name = "docker_config",
+    # Replace this with an absolute path to a directory which has a custom docker
+    # client config.json. Note relative paths are not supported.
+    # Docker allows you to specify custom authentication credentials
+    # in the client configuration JSON file.
+    # See https://docs.docker.com/engine/reference/commandline/cli/#configuration-files
+    # for more details.
+    client_config = "/Users/Anders/.docker/config.json",
 )
-
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.0/bazel-gazelle-v0.19.0.tar.gz",
     ],
+    sha256 = "41bff2a0b32b02f20c227d234aa25ef3783998e5453f7eade929704dcff7cd4b",
 )
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
@@ -231,8 +233,8 @@ go_repository(
 go_repository(
     name = "com_github_anders617_mdining_proto",
     importpath = "github.com/anders617/mdining-proto",
-    sum = "h1:9mJByZxVaLaZ0KkonehnnkPpBf8vcFYW/lufanh97vw=",
-    version = "v0.0.5",
+    sum = "h1:7U9tm+/IsxsICmuN2idzIh2vcRrIO4bx/07hf781UtA=",
+    version = "v0.0.8",
 )
 
 go_repository(
@@ -240,4 +242,13 @@ go_repository(
     importpath = "github.com/google/uuid",
     sum = "h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=",
     version = "v1.1.1",
+)
+
+##
+# build_bazel_rules_nodejs - Included for generating nodejs
+##
+http_archive(
+    name = "build_bazel_rules_nodejs",
+    sha256 = "3d7296d834208792fa3b2ded8ec04e75068e3de172fae79db217615bd75a6ff7",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/0.39.1/rules_nodejs-0.39.1.tar.gz"],
 )
