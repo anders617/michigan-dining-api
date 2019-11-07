@@ -51,7 +51,7 @@ func (ac *AnalyticsClient) SendHit(r *http.Request) {
 	params.Set("v", analyticsVersion)
 	params.Set("tid", analyticsTrackingID)
 	params.Set("ds", analyticsDataSource)
-	params.Set("uid", ac.getUserID(ip))
+	params.Set("cid", ac.getUserID(ip))
 	params.Set("uip", ip)
 	params.Set("ua", r.Header.Get("User-Agent"))
 	params.Set("dp", r.URL.Path)
