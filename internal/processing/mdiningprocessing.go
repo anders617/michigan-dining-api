@@ -65,6 +65,10 @@ func FoodsToItems(foods *[]*pb.Food) *pb.Items {
 				}
 			}
 		}
+		if len(item.DiningHallMatches) == 0 {
+			// If we didn't add any dining hall matches, having an item is pointless
+			delete(items.Items, food.Key)
+		}
 	}
 	return &items
 }
