@@ -10,15 +10,10 @@ import (
 	"github.com/MichiganDiningAPI/internal/util/date"
 	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-type heartStreamRequest struct {
-	done    chan struct{}
-	stream  pb.MDining_StreamHeartsServer
-	request pb.HeartsRequest
-}
 
 type Server struct {
 	dc                *dynamoclient.DynamoClient
@@ -27,7 +22,7 @@ type Server struct {
 	filterableEntries *pb.FilterableEntries
 	foodStats         *[]*pb.FoodStat
 	lastFetch         time.Time
-	heartStreams      map[*heartStreamRequest]struct{}
+	heartStreams      map[string]*heartStreamRequest
 	mu                sync.RWMutex
 }
 
@@ -37,7 +32,7 @@ func New() *Server {
 	s.items = nil
 	s.filterableEntries = nil
 	s.foodStats = nil
-	s.heartStreams = make(map[*heartStreamRequest]struct{})
+	s.heartStreams = make(map[string]*heartStreamRequest)
 	s.fetchData()
 	s.listenForHearts()
 	return &s
@@ -49,7 +44,8 @@ func (s *Server) listenForHearts() {
 		for heartCount := range heartsChan {
 			glog.Infof("Publishing heart count: %v", heartCount)
 			s.mu.RLock()
-			for streamReq := range s.heartStreams {
+			glog.Infof("There are currently %d heart streams open", len(s.heartStreams))
+			for id, streamReq := range s.heartStreams {
 				foundKey := false
 				for _, key := range streamReq.request.Keys {
 					if key == heartCount.Key {
@@ -58,9 +54,12 @@ func (s *Server) listenForHearts() {
 					}
 				}
 				if foundKey {
+					glog.Infof("Sending to stream %s", id)
 					if err := streamReq.stream.Send(&pb.HeartsReply{Counts: []*pb.HeartCount{&heartCount}}); err != nil {
+						glog.Errorf("Error sending to stream %s: %s", id, err)
 						streamReq.done <- struct{}{}
 					}
+					glog.Infof("Sent to stream %s", id)
 				}
 			}
 			s.mu.RUnlock()
@@ -256,28 +255,31 @@ func (s *Server) AddHeart(ctx context.Context, req *pb.HeartsRequest) (*pb.Heart
 }
 
 func (s *Server) GetHearts(ctx context.Context, req *pb.HeartsRequest) (*pb.HeartsReply, error) {
-	reply := pb.HeartsReply{Counts: []*pb.HeartCount{}}
-	for _, key := range req.Keys {
-		count := pb.HeartCount{Key: key, Count: 0}
-		if err := s.dc.GetProto(dynamoclient.HeartsTableName, map[string]string{dynamoclient.HeartsTableKey: key}, &count); err != nil {
-			// If it isn't in the table yet, assume it is zero
-			count.Key = key
-			count.Count = 0
-		}
-		reply.Counts = append(reply.Counts, &count)
+	counts, err := s.dc.GetHearts(req.Keys)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Error making databse request")
 	}
-	return &reply, nil
+	return &pb.HeartsReply{Counts: *counts}, nil
+}
+
+type heartStreamRequest struct {
+	id      string
+	done    chan struct{}
+	stream  pb.MDining_StreamHeartsServer
+	request pb.HeartsRequest
 }
 
 func (s *Server) StreamHearts(req *pb.HeartsRequest, stream pb.MDining_StreamHeartsServer) error {
 	done := make(chan struct{})
-	streamReq := &heartStreamRequest{done: done, stream: stream, request: *req}
+	streamReq := &heartStreamRequest{id: uuid.New().String(), done: done, stream: stream, request: *req}
+	glog.Infof("Opening heart stream %s", streamReq.id)
 	s.mu.Lock()
-	s.heartStreams[streamReq] = struct{}{}
+	s.heartStreams[streamReq.id] = streamReq
 	s.mu.Unlock()
 	<-done
+	glog.Infof("Closing heart stream %s", streamReq.id)
 	s.mu.Lock()
-	delete(s.heartStreams, streamReq)
+	delete(s.heartStreams, streamReq.id)
 	s.mu.Unlock()
 	return nil
 }

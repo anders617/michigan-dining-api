@@ -38,6 +38,47 @@ func New() *DynamoClient {
 	return dc
 }
 
+func (d *DynamoClient) GetHearts(keys []string) (*[]*pb.HeartCount, error) {
+	paramKeys := []map[string]dynamodb.AttributeValue{}
+	for _, key := range keys {
+		attributeValue, err := dynamodbattribute.Marshal(&key)
+		if err != nil {
+			return nil, err
+		}
+		attributeKey := map[string]dynamodb.AttributeValue{
+			HeartsTableKey: *attributeValue,
+		}
+		paramKeys = append(paramKeys, attributeKey)
+	}
+	params := dynamodb.BatchGetItemInput{
+		RequestItems: map[string]dynamodb.KeysAndAttributes{
+			HeartsTableName: dynamodb.KeysAndAttributes{
+				Keys: paramKeys}}}
+	req := d.client.BatchGetItemRequest(&params)
+
+	resp, err := req.Send(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	heartCounts := []*pb.HeartCount{}
+	for _, item := range resp.Responses[HeartsTableName] {
+		heartCount := pb.HeartCount{}
+		err = dynamodbattribute.UnmarshalMap(item, &heartCount)
+		heartCounts = append(heartCounts, &heartCount)
+	}
+	for _, key := range resp.UnprocessedKeys[HeartsTableName].Keys {
+		keyAttribute := key[HeartsTableKey]
+		keyValue := ""
+		err := dynamodbattribute.Unmarshal(&keyAttribute, keyValue)
+		if err != nil {
+			continue
+		}
+		heartCount := pb.HeartCount{Key: keyValue, Count: 0}
+		heartCounts = append(heartCounts, &heartCount)
+	}
+	return &heartCounts, nil
+}
+
 func (d *DynamoClient) AddHeart(key string) (*pb.HeartCount, error) {
 	updateExpression := expression.Add(expression.Name("count"), expression.Value(1))
 	expr, _ := expression.NewBuilder().WithUpdate(updateExpression).Build()
