@@ -233,22 +233,20 @@ go_repository(
 go_repository(
     name = "com_github_anders617_mdining_proto",
     importpath = "github.com/anders617/mdining-proto",
-    sum = "h1:7U9tm+/IsxsICmuN2idzIh2vcRrIO4bx/07hf781UtA=",
-    version = "v0.0.8",
+    sum = "h1:G6Z+wnrrCwMg56kC+kh4nxMXC0XM0xuQRaTjesg55G4=",
+    version = "v0.1.1",
 )
+
+load("@com_github_anders617_mdining_proto//rules:rule_deps.bzl", "rule_dependencies")
+rule_dependencies()
+load("@com_github_anders617_mdining_proto//rules:proto_deps.bzl", "proto_dependencies")
+proto_dependencies()
+load("@com_github_anders617_mdining_proto//rules:go_deps.bzl", "go_dependencies")
+go_dependencies()
 
 go_repository(
     name = "com_github_google_uuid",
     importpath = "github.com/google/uuid",
     sum = "h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=",
     version = "v1.1.1",
-)
-
-##
-# build_bazel_rules_nodejs - Included for generating nodejs
-##
-http_archive(
-    name = "build_bazel_rules_nodejs",
-    sha256 = "3d7296d834208792fa3b2ded8ec04e75068e3de172fae79db217615bd75a6ff7",
-    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/0.39.1/rules_nodejs-0.39.1.tar.gz"],
 )

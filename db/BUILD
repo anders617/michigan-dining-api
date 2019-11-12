@@ -7,7 +7,8 @@ go_library(
         "createtables.go",
         "tableschemas.go",
         "deletetables.go",
-        "queries.go"
+        "queries.go",
+        "streams.go",
     ],
     importpath = "github.com/MichiganDiningAPI/db/dynamoclient",
     visibility = ["//visibility:public"],
@@ -19,6 +20,7 @@ go_library(
         "@com_github_aws_aws_sdk_go_v2//service/dynamodb:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//service/dynamodb/expression:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//service/dynamodb/dynamodbattribute:go_default_library",
+        "@com_github_aws_aws_sdk_go_v2//service/dynamodbstreams:go_default_library",
         "@com_github_golang_glog//:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
     ]

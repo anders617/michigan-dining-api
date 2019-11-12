@@ -6,16 +6,20 @@ import (
 	"reflect"
 	"time"
 
+	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/expression"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodbstreams"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
 
 type DynamoClient struct {
-	client *dynamodb.Client
+	client       *dynamodb.Client
+	streamClient *dynamodbstreams.Client
 }
 
 func New() *DynamoClient {
@@ -30,7 +34,37 @@ func New() *DynamoClient {
 	// TODO: Make this configurable
 	cfg.Region = endpoints.UsEast1RegionID
 	dc.client = dynamodb.New(cfg)
+	dc.streamClient = dynamodbstreams.New(cfg)
 	return dc
+}
+
+func (d *DynamoClient) AddHeart(key string) (*pb.HeartCount, error) {
+	updateExpression := expression.Add(expression.Name("count"), expression.Value(1))
+	expr, _ := expression.NewBuilder().WithUpdate(updateExpression).Build()
+	dynamoKey, err := dynamodbattribute.Marshal(&key)
+	if err != nil {
+		return nil, err
+	}
+	params := dynamodb.UpdateItemInput{
+		TableName:                 &HeartsTableName,
+		Key:                       map[string]dynamodb.AttributeValue{HeartsTableKey: *dynamoKey},
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		UpdateExpression:          expr.Update(),
+		ReturnValues:              dynamodb.ReturnValueAllNew,
+	}
+	req := d.client.UpdateItemRequest(&params)
+
+	resp, err := req.Send(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	heartCount := pb.HeartCount{}
+	err = dynamodbattribute.UnmarshalMap(resp.Attributes, &heartCount)
+	if err != nil {
+		return nil, err
+	}
+	return &heartCount, nil
 }
 
 func (d *DynamoClient) GetProto(table string, keys map[string]string, p proto.Message) error {

@@ -41,11 +41,13 @@ func (d *DynamoClient) createTable(table string) {
 	read, write := int64(5), int64(5)
 	keys, _ := TableKeys[table]
 	attrs, _ := TableAttributes[table]
+	streamSpec, _ := TableStreamSpecs[table]
 	createReq := d.client.CreateTableRequest(&dynamodb.CreateTableInput{
 		TableName:             &table,
 		KeySchema:             keys,
 		AttributeDefinitions:  attrs,
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{ReadCapacityUnits: &read, WriteCapacityUnits: &write}})
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{ReadCapacityUnits: &read, WriteCapacityUnits: &write},
+		StreamSpecification:   &streamSpec})
 	_, err := createReq.Send(context.Background())
 	if err != nil {
 		glog.Fatalf("Failed to create table %s %v", table, err)

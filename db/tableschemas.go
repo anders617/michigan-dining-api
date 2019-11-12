@@ -10,6 +10,7 @@ var (
 	MenuTableName        = "Menus"
 	FoodTableName        = "Foods"
 	FoodStatsTableName   = "FoodStats"
+	HeartsTableName      = "Hearts"
 )
 
 var (
@@ -20,6 +21,12 @@ var (
 	FoodTableNameKey           = "key"
 	MenuTableDiningHallMealKey = "diningHallMeal"
 	FoodStatsDateKey           = "date"
+	HeartsTableKey             = "key"
+)
+
+var (
+	trueValue  = true
+	falseValue = false
 )
 
 var (
@@ -28,7 +35,8 @@ var (
 		ItemsTableName,
 		MenuTableName,
 		FoodTableName,
-		FoodStatsTableName}
+		FoodStatsTableName,
+		HeartsTableName}
 	TableKeys = map[string][]dynamodb.KeySchemaElement{
 		DiningHallsTableName: []dynamodb.KeySchemaElement{
 			dynamodb.KeySchemaElement{
@@ -56,8 +64,12 @@ var (
 			dynamodb.KeySchemaElement{
 				AttributeName: &FoodStatsDateKey,
 				KeyType:       "HASH",
-			},
-		}}
+			}},
+		HeartsTableName: []dynamodb.KeySchemaElement{
+			dynamodb.KeySchemaElement{
+				AttributeName: &HeartsTableKey,
+				KeyType:       "HASH",
+			}}}
 	TableAttributes = map[string][]dynamodb.AttributeDefinition{
 		DiningHallsTableName: []dynamodb.AttributeDefinition{
 			dynamodb.AttributeDefinition{
@@ -84,6 +96,17 @@ var (
 		FoodStatsTableName: []dynamodb.AttributeDefinition{
 			dynamodb.AttributeDefinition{
 				AttributeName: &FoodStatsDateKey,
-				AttributeType: dynamodb.ScalarAttributeTypeS},
-		}}
+				AttributeType: dynamodb.ScalarAttributeTypeS}},
+		HeartsTableName: []dynamodb.AttributeDefinition{
+			dynamodb.AttributeDefinition{
+				AttributeName: &HeartsTableKey,
+				AttributeType: dynamodb.ScalarAttributeTypeS}}}
+	TableStreamSpecs = map[string]dynamodb.StreamSpecification{
+		DiningHallsTableName: dynamodb.StreamSpecification{StreamEnabled: &falseValue, StreamViewType: dynamodb.StreamViewTypeNewImage},
+		ItemsTableName:       dynamodb.StreamSpecification{StreamEnabled: &falseValue, StreamViewType: dynamodb.StreamViewTypeNewImage},
+		MenuTableName:        dynamodb.StreamSpecification{StreamEnabled: &falseValue, StreamViewType: dynamodb.StreamViewTypeNewImage},
+		FoodTableName:        dynamodb.StreamSpecification{StreamEnabled: &falseValue, StreamViewType: dynamodb.StreamViewTypeNewImage},
+		FoodStatsTableName:   dynamodb.StreamSpecification{StreamEnabled: &falseValue, StreamViewType: dynamodb.StreamViewTypeNewImage},
+		HeartsTableName:      dynamodb.StreamSpecification{StreamEnabled: &trueValue, StreamViewType: dynamodb.StreamViewTypeNewImage},
+	}
 )
