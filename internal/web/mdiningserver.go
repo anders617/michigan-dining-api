@@ -258,7 +258,7 @@ func (s *Server) AddHeart(ctx context.Context, req *pb.HeartsRequest) (*pb.Heart
 func (s *Server) GetHearts(ctx context.Context, req *pb.HeartsRequest) (*pb.HeartsReply, error) {
 	reply := pb.HeartsReply{Counts: []*pb.HeartCount{}}
 	for _, key := range req.Keys {
-		count := pb.HeartCount{}
+		count := pb.HeartCount{Key: key, Count: 0}
 		if err := s.dc.GetProto(dynamoclient.HeartsTableName, map[string]string{dynamoclient.HeartsTableKey: key}, &count); err != nil {
 			// If it isn't in the table yet, assume it is zero
 			count.Key = key
