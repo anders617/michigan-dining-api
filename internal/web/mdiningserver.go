@@ -2,6 +2,7 @@ package mdiningserver
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
 
@@ -242,6 +243,7 @@ func (s *Server) GetFoodStats(ctx context.Context, req *pb.FoodStatsRequest) (*p
 }
 
 func (s *Server) AddHeart(ctx context.Context, req *pb.HeartsRequest) (*pb.HeartsReply, error) {
+	glog.Infof("AddHeart req{%v}", req)
 	reply := pb.HeartsReply{Counts: []*pb.HeartCount{}}
 	for _, key := range req.Keys {
 		heartCount, err := s.dc.AddHeart(key)
@@ -255,6 +257,10 @@ func (s *Server) AddHeart(ctx context.Context, req *pb.HeartsRequest) (*pb.Heart
 }
 
 func (s *Server) GetHearts(ctx context.Context, req *pb.HeartsRequest) (*pb.HeartsReply, error) {
+	glog.Infof("GetHearts req{%v}", req)
+	for i, key := range req.Keys {
+		req.Keys[i] = strings.ToLower(key)
+	}
 	counts, err := s.dc.GetHearts(req.Keys)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Error making databse request")
@@ -270,6 +276,7 @@ type heartStreamRequest struct {
 }
 
 func (s *Server) StreamHearts(req *pb.HeartsRequest, stream pb.MDining_StreamHeartsServer) error {
+	glog.Infof("StreamHearts req{%v}", req)
 	done := make(chan struct{})
 	streamReq := &heartStreamRequest{id: uuid.New().String(), done: done, stream: stream, request: *req}
 	glog.Infof("Opening heart stream %s", streamReq.id)
