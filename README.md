@@ -91,6 +91,7 @@ There are [scheduled tasks](https://docs.aws.amazon.com/AmazonECS/latest/develop
 ### Heroku
 Currently michigan-dining-api is deployed and hosted on [Heroku](https://www.heroku.com/home) at https://michigan-dining-api.herokuapp.com.
 
+Heroku is not optimal for hosting grpc servers since it does not support HTTP/2. Therefore, if you plan to take advantage of grpc, I recommend you use a different provider such as AWS.
 
 In order to deploy your own server:
 * Setup the Heroku application to point to this repository
