@@ -55,5 +55,5 @@ container_push(
     # Any of these components may have variables.
     registry = "gcr.io",
     repository = "michigandiningapi/web",
-    tag = "dev"
+    tag = "latest"
 )

@@ -10,6 +10,7 @@ import (
 	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 //
@@ -17,10 +18,15 @@ import (
 //
 
 func main() {
-	address := flag.String("address", "michigan-dining-api.herokuapp.com:80", "The address of the mdining server to connect to.")
+	address := flag.String("address", "michigan-dining-api.tendiesti.me:80", "The address of the mdining server to connect to.")
+	useCredentials := flag.Bool("use_credentials", false, "Whether to use tls credentials or not when connecting to the server.")
 	flag.Parse()
 	glog.Infof("Connecting...")
-	conn, err := grpc.Dial(*address, grpc.WithInsecure(), grpc.WithBlock())
+	credentialOpt := grpc.WithInsecure()
+	if *useCredentials {
+		credentialOpt = grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, ""))
+	}
+	conn, err := grpc.Dial(*address, credentialOpt, grpc.WithBlock())
 	if err != nil {
 		glog.Fatalf("Could not dial %s: %s", address, err)
 	}

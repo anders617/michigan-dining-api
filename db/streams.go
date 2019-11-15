@@ -3,6 +3,7 @@ package dynamoclient
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	pb "github.com/anders617/mdining-proto/proto/mdining"
@@ -12,50 +13,98 @@ import (
 )
 
 func (d *DynamoClient) StreamHearts() (chan pb.HeartCount, chan struct{}) {
-	streamArn, err := d.getTableStreamArn(HeartsTableName)
-	if err != nil {
-		glog.Fatalf("Failed to get stream arn")
-	}
-	glog.Infof("Stream Arn: %s", *streamArn)
-	shards, err := d.getStreamShards(*streamArn)
-	if err != nil {
-		glog.Fatalf("Failed to get stream shards")
-	}
-	recordChans := []chan dynamodbstreams.Record{}
-	doneChans := []chan struct{}{}
-	for _, shard := range *shards {
-		shardIt, err := d.getShardIterator(*streamArn, shard)
-		if err != nil {
-			glog.Fatalf("Failed to get shard iterator")
+	heartCountChan := make(chan pb.HeartCount)
+	recordChan, doneChan := d.streamRecords(HeartsTableName)
+	go func(heartCountChan chan pb.HeartCount, recordChan chan dynamodbstreams.Record) {
+		for record := range recordChan {
+			heartCount := pb.HeartCount{}
+			err := dynamodbattribute.UnmarshalMap(record.Dynamodb.NewImage, &heartCount)
+			if err != nil {
+				glog.Warningf("Could not umarshal heart count: %s", err)
+				continue
+			}
+			heartCountChan <- heartCount
 		}
-		records, done := d.pollShardForRecords(*shardIt)
-		recordChans = append(recordChans, records)
-		doneChans = append(doneChans, done)
-	}
-	recordChan := make(chan pb.HeartCount)
+	}(heartCountChan, recordChan)
+	return heartCountChan, doneChan
+}
+
+func (d *DynamoClient) streamRecords(table string) (chan dynamodbstreams.Record, chan struct{}) {
+	recordChan := make(chan dynamodbstreams.Record)
 	doneChan := make(chan struct{})
-	// Aggregate each shard specific recordChan into one channel
-	for _, records := range recordChans {
-		go func(records chan dynamodbstreams.Record) {
-			for record := range records {
-				heartCount := pb.HeartCount{}
-				err := dynamodbattribute.UnmarshalMap(record.Dynamodb.NewImage, &heartCount)
-				if err != nil {
-					glog.Warningf("Could not umarshal heart count: %s", err)
+	go func(recordChan chan dynamodbstreams.Record, doneChan chan struct{}, table string) {
+		processingShards := map[string]struct{}{}
+		ticker := time.NewTicker(5 * time.Minute)
+		doneChans := []chan struct{}{}
+		done := false
+		mu := sync.Mutex{}
+		shardPollCount := 0
+		shardPollCountMu := sync.Mutex{}
+		// Send done message to all shard specific doneChans if we get a done message
+		go func(doneChan chan struct{}, recordChan chan dynamodbstreams.Record) {
+			<-doneChan
+			mu.Lock()
+			for _, done := range doneChans {
+				done <- struct{}{}
+			}
+			close(recordChan)
+			done = true
+			mu.Unlock()
+		}(doneChan, recordChan)
+		for {
+			mu.Lock()
+			if done {
+				break
+			}
+			streamArn, err := d.getTableStreamArn(table)
+			if err != nil {
+				glog.Fatalf("Failed to get stream arn")
+			}
+			glog.Infof("Stream Arn: %s", *streamArn)
+			shards, err := d.getStreamShards(*streamArn)
+			if err != nil {
+				glog.Fatalf("Failed to get stream shards")
+			}
+			recordChans := []chan dynamodbstreams.Record{}
+			// For each shard, start polling for records
+			for _, shard := range *shards {
+				_, alreadyProcessing := processingShards[*shard.ShardId]
+				if alreadyProcessing {
 					continue
 				}
-				recordChan <- heartCount
+				glog.Infof("Processing new shard: %s", *shard.ShardId)
+				processingShards[*shard.ShardId] = struct{}{}
+				shardIt, err := d.getShardIterator(*streamArn, shard)
+				if err != nil {
+					glog.Fatalf("Failed to get shard iterator")
+				}
+				shardPollCountMu.Lock()
+				shardPollCount++
+				shardPollCountMu.Unlock()
+				records, done := d.pollShardForRecords(*shardIt)
+				recordChans = append(recordChans, records)
+				doneChans = append(doneChans, done)
 			}
-		}(records)
-	}
-	// Send done message to all shard specific doneChans if we get a done message
-	go func(doneChan chan struct{}, recordChan chan pb.HeartCount) {
-		<-doneChan
-		for _, done := range doneChans {
-			done <- struct{}{}
+			// Aggregate each shard specific recordChan into one channel
+			for _, records := range recordChans {
+				go func(records chan dynamodbstreams.Record) {
+					for record := range records {
+						recordChan <- record
+					}
+					shardPollCountMu.Lock()
+					shardPollCount--
+					shardPollCountMu.Unlock()
+					glog.Infof("Closed records")
+				}(records)
+			}
+			shardPollCountMu.Lock()
+			glog.Infof("%d shard pollers active for table %s", shardPollCount, table)
+			shardPollCountMu.Unlock()
+			mu.Unlock()
+			// Wait for next tick to check for new shards
+			<-ticker.C
 		}
-		close(recordChan)
-	}(doneChan, recordChan)
+	}(recordChan, doneChan, table)
 	return recordChan, doneChan
 }
 
@@ -64,10 +113,10 @@ func (d *DynamoClient) pollShardForRecords(shardIterator string) (chan dynamodbs
 	doneChan := make(chan struct{})
 	go func(recordChan chan dynamodbstreams.Record, doneChan chan struct{}, shardIterator string) {
 		shardIt := &shardIterator
+		defer close(recordChan)
 		for shardIt != nil {
 			select {
 			case <-doneChan:
-				close(recordChan)
 				return
 			default:
 				var records *[]dynamodbstreams.Record
