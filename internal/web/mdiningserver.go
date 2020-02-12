@@ -235,10 +235,10 @@ func (s *Server) GetFood(ctx context.Context, req *pb.FoodRequest) (*pb.FoodRepl
 func (s *Server) GetFoodStats(ctx context.Context, req *pb.FoodStatsRequest) (*pb.FoodStatsReply, error) {
 	glog.Infof("GetFoodStats req{%v}", req)
 	s.mu.RLock()
+	defer s.mu.RUnlock()
 	if s.foodStats == nil {
 		return nil, status.Error(codes.Unavailable, "Fetching data...")
 	}
-	defer s.mu.RUnlock()
 	return &pb.FoodStatsReply{FoodStats: *s.foodStats}, nil
 }
 

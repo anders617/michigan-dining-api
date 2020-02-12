@@ -16,20 +16,21 @@ func (d *DynamoClient) QueryFoodStats() (*[]*pb.FoodStat, error) {
 	params := &dynamodb.ScanInput{
 		TableName: aws.String(FoodStatsTableName),
 	}
-	// Make the DynamoDB Query API call
+
 	req := d.client.ScanRequest(params)
-	result, err := req.Send(context.Background())
-	if err != nil {
-		return nil, err
-	}
+	p := dynamodb.NewScanPaginator(req)
+
 	foodStats := make([]*pb.FoodStat, 0)
-	for _, i := range result.Items {
-		stat := pb.FoodStat{}
-		err := dynamodbattribute.UnmarshalMap(i, &stat)
-		if err != nil {
-			return nil, err
+	for p.Next(context.Background()) {
+		page := p.CurrentPage()
+		for _, item := range page.Items {
+			stat := pb.FoodStat{}
+			err := dynamodbattribute.UnmarshalMap(item, &stat)
+			if err != nil {
+				return nil, err
+			}
+			foodStats = append(foodStats, &stat)
 		}
-		foodStats = append(foodStats, &stat)
 	}
 	return &foodStats, nil
 }

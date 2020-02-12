@@ -38,6 +38,11 @@ func main() {
 		glog.Fatalf("Could not call GetDiningHalls: %s", err)
 	}
 	glog.Infof("DiningHallsReply: %v", diningHallsReply)
+	allReply, err := c.GetAll(context.Background(), &pb.AllRequest{})
+	if err != nil {
+		glog.Fatalf("Could not call GetAll: %s", err)
+	}
+	glog.Infof("AllReply: %v", allReply)
 	res, err := c.GetHearts(context.Background(), &pb.HeartsRequest{Keys: []string{"test", "test2"}})
 	if err != nil {
 		glog.Fatalf("GetHearts err: %s", err)
