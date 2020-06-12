@@ -35,6 +35,9 @@ func countTimesServed(food *pb.Food) int64 {
 
 func updateStats(foodStats *pb.FoodStat, food *pb.Food) {
 	timesServed := countTimesServed(food)
+	if timesServed == 0 {
+		return
+	}
 	foodStats.TotalFoodMealsServed += timesServed
 	foodStats.TimesServed[food.Key] += timesServed
 	for _, cat := range food.Category {
@@ -109,8 +112,8 @@ func main() {
 	stats := map[string]*pb.FoodStat{}
 
 	// Find all foods and calculate
-	startDate := date.FormatNoTime(date.Now())
-	dc.ForEachFood(&startDate, nil, func(food *pb.Food) {
+	// startDate := date.FormatNoTime(date.Now())
+	dc.ForEachFood(nil, nil, func(food *pb.Food) {
 		stat, exists := stats[food.Date]
 		if !exists {
 			stat = NewFoodStat(food.Date)
