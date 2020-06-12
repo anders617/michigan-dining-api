@@ -22,6 +22,10 @@ func logStats(container interface{}) {
 func countTimesServed(food *pb.Food) int64 {
 	count := int64(0)
 	for _, dh := range food.DiningHallMatch {
+		if dh.Campus != "" && dh.Campus != "DINING HALLS" {
+			// For now, only analyze actual Dining Hall foods
+			continue
+		}
 		for _, mealTime := range dh.MealTime {
 			count += int64(len(mealTime.MealNames))
 		}
@@ -105,8 +109,8 @@ func main() {
 	stats := map[string]*pb.FoodStat{}
 
 	// Find all foods and calculate
-	startDate := date.FormatNoTime(date.Now())
-	dc.ForEachFood(&startDate, nil, func(food *pb.Food) {
+	//startDate := date.FormatNoTime(date.Now())
+	dc.ForEachFood(nil, nil, func(food *pb.Food) {
 		stat, exists := stats[food.Date]
 		if !exists {
 			stat = NewFoodStat(food.Date)
