@@ -112,8 +112,8 @@ func main() {
 	stats := map[string]*pb.FoodStat{}
 
 	// Find all foods and calculate
-	// startDate := date.FormatNoTime(date.Now())
-	dc.ForEachFood(nil, nil, func(food *pb.Food) {
+	startDate := date.FormatNoTime(date.Now())
+	dc.ForEachFood(&startDate, nil, func(food *pb.Food) {
 		stat, exists := stats[food.Date]
 		if !exists {
 			stat = NewFoodStat(food.Date)
