@@ -233,8 +233,8 @@ go_repository(
 go_repository(
     name = "com_github_anders617_mdining_proto",
     importpath = "github.com/anders617/mdining-proto",
-    sum = "h1:G6Z+wnrrCwMg56kC+kh4nxMXC0XM0xuQRaTjesg55G4=",
-    version = "v0.1.1",
+    sum = "h1:2ksP9EmE0byQhwVYHR9briC9OZ9ygj1d0jH5j0w1RVI=",
+    version = "v0.2.1",
 )
 
 load("@com_github_anders617_mdining_proto//rules:rule_deps.bzl", "rule_dependencies")

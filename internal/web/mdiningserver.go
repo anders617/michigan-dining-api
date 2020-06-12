@@ -22,6 +22,7 @@ type Server struct {
 	items             *pb.Items
 	filterableEntries *pb.FilterableEntries
 	foodStats         *[]*pb.FoodStat
+	summaryStats      *pb.SummaryStats
 	lastFetch         time.Time
 	heartStreams      map[string]*heartStreamRequest
 	mu                sync.RWMutex
@@ -128,6 +129,7 @@ func (s *Server) fetchFoodStats(wg *sync.WaitGroup) {
 	}
 	s.mu.Lock()
 	s.foodStats = tmp
+	s.summaryStats = mdiningprocessing.FoodStatsToSummaryStats(tmp)
 	s.mu.Unlock()
 	glog.Infof("QueryFoodStats Success")
 }
@@ -240,6 +242,16 @@ func (s *Server) GetFoodStats(ctx context.Context, req *pb.FoodStatsRequest) (*p
 		return nil, status.Error(codes.Unavailable, "Fetching data...")
 	}
 	return &pb.FoodStatsReply{FoodStats: *s.foodStats}, nil
+}
+
+func (s *Server) GetSummaryStats(ctx context.Context, req *pb.SummaryStatsRequest) (*pb.SummaryStatsReply, error) {
+	glog.Infof("GetSummaryStats req{%v}", req)
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.summaryStats == nil {
+		return nil, status.Error(codes.Unavailable, "Fetching data...")
+	}
+	return &pb.SummaryStatsReply{Stats: s.summaryStats}, nil
 }
 
 func (s *Server) AddHeart(ctx context.Context, req *pb.HeartsRequest) (*pb.HeartsReply, error) {
