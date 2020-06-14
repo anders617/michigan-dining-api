@@ -5,11 +5,64 @@
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <title>michigan-dining-api</title>
     <meta name="description="
-        content="API for retrieving information about University of Michigan dining halls. Foods, menus, location info and more.">
+        content="API for retrieving information about University of Michigan dining halls. MDining foods, menus, location info and more.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html {
+            width: 100vw;
+            max-width: 100%;
+        }
+
+        body {
+            padding: 0px;
+            margin: 0px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        p {
+            padding: 0px;
+            width: 100%;
+            overflow-wrap: normal;
+        }
+
+        main {
+            margin: 8px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li p {
+            padding-left: 1em;
+            margin: 0px;
+        }
+
+        @media only screen and (min-device-width: 481px) and (min-width: 768px) {
+            main {
+                max-width: min(650px, 100vw);
+            }
+        }
+
+        @media only screen and (min-device-width : 320px) and (max-width: 768px) {
+            p {
+                font-size: 19pt;
+            }
+
+            a {
+                font-size: 19pt;
+            }
+
+            main {
+                max-width: 75vw;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <main style="max-width: 650px;">
+    <main>
         <article>
             <header>
                 <h1>michigan-dining-api</h1>
@@ -19,6 +72,17 @@
             </header>
             <section>
                 <h2>About</h2>
+                <p>
+                    Data is scraped from the University of Michigan's MDining API, formatted and stored in a database to
+                    be served.
+                    This allows for data structures and formats that are easier to work with than the original API and
+                    for historical
+                    data to be retrieved past what the MDining API offers (2019-11-02 is the earliest date available
+                    through this service).
+                    Check out <a href="https://tendiesti.me/stats">the MDining statistics page of tendies time</a> for
+                    examples of using
+                    this historical data.
+                </p>
                 <p>
                     The project is located on github <a href="https://github.com/anders617/michigan-dining-api"
                         target="_blank" rel="noopener noreferrer">here</a>.
@@ -50,48 +114,91 @@
                         href="https://github.com/anders617/mdining-proto" target="_blank"
                         rel="noopener noreferrer">mdining-proto</a>, but the responses will be serialized in JSON
                     instead of binary protobuf formats.
-                </br>
-                </br>
-                    Here is a list of REST JSON endpoints that exist as of writing:
-                    <ul style="list-style: none;">
-                        <li>
-                            <a href="/v1/all">/v1/all</a>
-                        </li>
-                        <li>
-                            <a href="/v1/diningHalls">/v1/diningHalls</a>
-                        </li>
-                        <li>
-                            <a href="/v1/items">/v1/items</a>
-                        </li>
-                        <li>
-                            <a href="/v1/filterableEntries">/v1/filterableEntries</a>
-                        </li>
-                        <li>
-                            <a href="/v1/menus?date=2019-11-04&diningHall=Bursley%20Dining%20Hall&meal=LUNCH">/v1/menus?date={yyyy-MM-dd}&diningHall={DINING_HALL}&meal={MEAL}</a>
-                        </li>
-                        <li>
-                            <a href="/v1/foods?name=chicken%20tenders&date=2019-11-08&meal=DINNER">/v1/foods?name={LOWERCASE_FOOD_NAME}&date={yyyy-MM-dd}&meal={MEAL}</a>
-                        </li>
-                        <li>
-                            <a href="/v1/stats">/v1/stats</a>
-                        </li>
-                        <li>
-                            <a href="/v1/hearts?keys=chicken%20tenders&keys=Pepperoni%20Bosco%20Sticks">/v1/hearts?keys={LOWERCASE_FOOD_NAME}&keys={etc...}</a>
-                        </li>
-                    </ul>
+                    </br>
+                    </br>
+                    Here is a list of REST JSON endpoints that exist as of writing (with links for example queries):
+                <ul>
+                    <li>
+                        <a href="/v1/all">/v1/all</a>
+                        <p>
+                            Provides /v1/diningHalls /v1/items and /v1/filterableEntries in a single request.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/v1/diningHalls">/v1/diningHalls</a>
+                        <p>
+                            Provides an array of U of M dining halls(including cafes and markets) locations and relevant
+                            information such as address.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/v1/items">/v1/items</a>
+                        <p>
+                            Provides a list of items for today and the next seven days. For each item, information on
+                            which dining halls are serving it is included among other things.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/v1/filterableEntries">/v1/filterableEntries</a>
+                        <p>
+                            Provides a list of filterable entries. Each entry includes an item name, dining hall the
+                            item is being served at, the date it is being served on and attribute information.
+                        </p>
+                    </li>
+                    <li>
+                        <a
+                            href="/v1/menus?date=2019-11-04&diningHall=Bursley%20Dining%20Hall&meal=LUNCH">/v1/menus?date={yyyy-MM-dd}&diningHall={DINING_HALL}&meal={MEAL}</a>
+                        <p>
+                            Provides the full menu for the given date, dining hall and meal. If one or more arguments is
+                            permitted then all relevant menus are returned. This includes nutrition information for menu
+                            items.
+                        </p>
+                    </li>
+                    <li>
+                        <a
+                            href="/v1/foods?name=chicken%20tenders&date=2019-11-08&meal=DINNER">/v1/foods?name={LOWERCASE_FOOD_NAME}&date={yyyy-MM-dd}&meal={MEAL}</a>
+                        <p>
+                            Provides information on where the given food is being served on the given date and meal.
+                            Includes nutrition info.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/v1/summarystats">/v1/summarystats</a>
+                        <p>
+                            Provides summary statistics on MDining service. For example, includes information on counts
+                            of how many times each food was served on each day of the week.
+                        </p>
+                    </li>
+                    <li>
+                        <a href="/v1/stats">/v1/stats</a>
+                        <p>
+                            Provides in depth information on daily MDining service. Too large in practive to be used.
+                        </p>
+                    </li>
+                    <li>
+                        <a
+                            href="/v1/hearts?keys=chicken%20tenders&keys=Pepperoni%20Bosco%20Sticks">/v1/hearts?keys={LOWERCASE_FOOD_NAME}&keys={etc...}</a>
+                        <p>
+                            Provides access to the hearts database which powers the hearts functionality on <a
+                                href="https://tendiesti.me/menu">the tendies time menu page</a> which allows users to
+                            click on a heart to indicate they like the item.
+                        </p>
+                    </li>
+                </ul>
                 </p>
             </section>
         </article>
     </main>
     <footer>
-    <p>
-        Problems? Want to contribute? Create an issue on the
-        <a href="https://github.com/anders617/michigan-dining-api"
-            target="_blank" rel="noopener noreferrer">github</a> page.
-    </p>
-    <p>
-        &copy; 2019 Anders Boberg
-    </p>
+        <p>
+            Problems? Want to contribute? Create an issue on the
+            <a href="https://github.com/anders617/michigan-dining-api" target="_blank"
+                rel="noopener noreferrer">github</a> page.
+        </p>
+        <p>
+            &copy; 2019-2020 <a href="https://andersboberg.com" style="color:black;text-decoration: none;"
+                target="_blank" rel="noopener noreferrer">Anders Boberg</a>
+        </p>
     </footer>
 </body>
 
