@@ -1,10 +1,20 @@
 # michigan-dining-api
 [![Build Status](https://travis-ci.org/anders617/michigan-dining-api.svg?branch=master)](https://travis-ci.org/anders617/michigan-dining-api)
 
-[michigan-dining-api.herokuapp.com](https://michigan-dining-api.herokuapp.com/) \
-[michigan-dining-api.tendiesti.me](https://michigan-dining-api.tendiesti.me/)
+[michigan-dining-api.tendiesti.me](https://michigan-dining-api.tendiesti.me/) \
+[michigan-dining-api.herokuapp.com](https://michigan-dining-api.herokuapp.com/)
 
 A system for scraping and serving information from the University of Michigan dining API. This repository contains the code for fetching, analyzing and serving dining information. For how to make use of this service, see the [usage](#Usage) section or visit the [mdining-proto](https://github.com/anders617/mdining-proto) repository for protobuf service definitions.
+
+
+Data is scraped from the University of Michigan's MDining API, formatted and stored in a database to
+be served.
+This allows for data structures and formats that are easier to work with than the original API and
+for historical
+data to be retrieved past what the MDining API offers (2019-11-02 is the earliest date available
+through the tendies time michigan dining api service).
+Check out <a href="https://tendiesti.me/stats">the MDining statistics page of tendies time</a> for
+examples made using this historical data.
 
 **[Setup](#Setup)** \
 **[Executables](#Executables)** \
@@ -108,12 +118,16 @@ In order to deploy your own server:
 ## Usage
 There are examples of grpc usage and client libraries in the [mdining-proto](https://github.com/anders617/mdining-proto) library. This library also contains the proto definitions of messages and services provided by this service.
 ### REST Endpoints
-[/v1/items](https://michigan-dining-api.herokuapp.com/v1/items) \
+You can try out the following queries to get a sense of what is available through the api. \
+Additionally, <a href="https://michigan-dining-api.tendiesti.me/" >the homepage for the tendies time michigan dining api service</a> has longer descriptions of the purpose of each query.
+
+[/v1/items](https://michigan-dining-api.tendiesti.me/v1/items) \
 [/v1/diningHalls](https://michigan-dining-api.herokuapp.com/v1/diningHalls) \
-[/v1/filterableEntries](https://michigan-dining-api.herokuapp.com/v1/filterableEntries) \
-[/v1/all](https://michigan-dining-api.herokuapp.com/v1/all) \
-[/v1/menus?date={yyyy-MM-dd}&diningHall={DINING_HALL}&meal={MEAL}](https://michigan-dining-api.herokuapp.com/v1/menus?date=2019-11-04&diningHall=Bursley%20Dining%20Hall&meal=LUNCH) \
-[/v1/foods?name={LOWERCASE_FOOD_NAME}&date={yyyy-MM-dd}&meal={MEAL}](https://michigan-dining-api.herokuapp.com/v1/foods?name=chicken%20tenders&date=2019-11-08&meal=DINNER) \
-[/v1/stats](https://michigan-dining-api.herokuapp.com/v1/stats) \
-[/v1/hearts](https://michigan-dining-api.herokuapp.com/v1/hearts?keys=chicken%20tenders)
+[/v1/filterableEntries](https://michigan-dining-api.tendiesti.me/v1/filterableEntries) \
+[/v1/all](https://michigan-dining-api.tendiesti.me/v1/all) \
+[/v1/menus?date={yyyy-MM-dd}&diningHall={DINING_HALL}&meal={MEAL}](https://michigan-dining-api.tendiesti.me/v1/menus?date=2019-11-04&diningHall=Bursley%20Dining%20Hall&meal=LUNCH) \
+[/v1/foods?name={LOWERCASE_FOOD_NAME}&date={yyyy-MM-dd}&meal={MEAL}](https://michigan-dining-api.tendiesti.me/v1/foods?name=chicken%20tenders&date=2019-11-08&meal=DINNER) \
+[/v1/summarystats](https://michigan-dining-api.tendiesti.me/v1/summarystats) \
+[/v1/stats](https://michigan-dining-api.tendiesti.me/v1/stats) \
+[/v1/hearts](https://michigan-dining-api.tendiesti.me/v1/hearts?keys=chicken%20tenders)
 
