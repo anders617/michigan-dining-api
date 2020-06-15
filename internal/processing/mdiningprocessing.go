@@ -16,7 +16,8 @@ func FoodStatsToSummaryStats(foodStats *[]*pb.FoodStat) *pb.SummaryStats {
 		TotalFoodMealsServed:    []int64{},
 		AllergenCounts:          map[string]*pb.CountArray{},
 		AttributeCounts:         map[string]*pb.CountArray{},
-		LatestWeekdayFoodCounts: map[string]*pb.StringToInt{},
+		Foods:                   []string{},
+		LatestWeekdayFoodCounts: map[string]*pb.CountArray{},
 	}
 	allergens := map[string]bool{}
 	attributes := map[string]bool{}
@@ -42,11 +43,14 @@ func FoodStatsToSummaryStats(foodStats *[]*pb.FoodStat) *pb.SummaryStats {
 	for attribute := range attributes {
 		summaryStats.AttributeCounts[attribute] = &pb.CountArray{}
 	}
-	summaryStats.LatestWeekdayFoodCounts = map[string]*pb.StringToInt{}
+	for food := range foods {
+		summaryStats.Foods = append(summaryStats.Foods, food)
+	}
+	summaryStats.LatestWeekdayFoodCounts = map[string]*pb.CountArray{}
 	for day := range days {
-		summaryStats.LatestWeekdayFoodCounts[day] = &pb.StringToInt{Data: map[string]int64{}}
-		for food := range foods {
-			summaryStats.LatestWeekdayFoodCounts[day].Data[food] = 0
+		summaryStats.LatestWeekdayFoodCounts[day] = &pb.CountArray{Counts: []int64{}}
+		for range foods {
+			summaryStats.LatestWeekdayFoodCounts[day].Counts = append(summaryStats.LatestWeekdayFoodCounts[day].Counts, 0)
 		}
 	}
 	for _, stat := range *foodStats {
@@ -69,9 +73,14 @@ func FoodStatsToSummaryStats(foodStats *[]*pb.FoodStat) *pb.SummaryStats {
 			summaryStats.AttributeCounts[attribute].Counts = append(summaryStats.AttributeCounts[attribute].Counts, count)
 		}
 		for day, counts := range stat.WeekdayFoodCounts {
-			for food, count := range counts.Data {
-				summaryStats.LatestWeekdayFoodCounts[day].Data[food] += count
+			for idx, food := range summaryStats.Foods {
+				if count, exists := counts.Data[food]; exists {
+					summaryStats.LatestWeekdayFoodCounts[day].Counts[idx] += count
+				}
 			}
+			// for food, count := range counts.Data {
+			// 	summaryStats.LatestWeekdayFoodCounts[day].Data[food] += count
+			// }
 		}
 	}
 	return summaryStats
