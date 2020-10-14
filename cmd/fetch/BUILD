@@ -8,11 +8,11 @@ go_library(
     importpath = "github.com/MichiganDiningAPI/cmd/fetch",
     visibility = ["//visibility:private"],
     deps = [
-        "//internal/processing:mdiningprocessing",
-        "//db:dynamoclient",
         "//api/mdining:mdiningclient",
-        "//internal/util:io",
+        "//db:dynamoclient",
+        "//internal/processing:mdiningprocessing",
         "//internal/util:containers",
+        "//internal/util:io",
         "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
         "@com_github_aws_aws_sdk_go_v2//aws:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//aws/endpoints:go_default_library",
@@ -20,14 +20,14 @@ go_library(
         "@com_github_aws_aws_sdk_go_v2//service/dynamodb:go_default_library",
         "@com_github_aws_aws_sdk_go_v2//service/dynamodb/dynamodbattribute:go_default_library",
         "@com_github_golang_glog//:go_default_library",
-        "@com_github_golang_protobuf//proto:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )
 
 go_binary(
     name = "fetch",
-    data = ["@com_github_anders617_mdining_proto//proto/sample:proto_sample_data",],
+    data = ["@com_github_anders617_mdining_proto//proto/sample:proto_sample_data"],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
@@ -35,14 +35,13 @@ go_binary(
 # Build with --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 go_image(
     name = "fetch_image",
-    data = ["@com_github_anders617_mdining_proto//proto/sample:proto_sample_data",],
-    embed = [":go_default_library"],
     args = [
         "--alsologtostderr",
     ],
+    data = ["@com_github_anders617_mdining_proto//proto/sample:proto_sample_data"],
+    embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
-
 # A common pattern when users want to avoid trampling
 # on each other's images during development.
 container_push(
@@ -52,5 +51,49 @@ container_push(
     # Any of these components may have variables.
     registry = "gcr.io",
     repository = "michigandiningapi/fetch",
-    tag = "latest"
+    tag = "latest",
+)
+
+go_library(
+    name = "fetch2_library",
+    srcs = ["main2.go"],
+    importpath = "github.com/MichiganDiningAPI/cmd/scrape",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//api/mdining:mdiningclient2",
+        "//db:dynamoclient",
+        "//internal/util:containers",
+        "//internal/processing:mdiningprocessing",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_golang_glog//:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "fetch2",
+    embed = [":fetch2_library"],
+    visibility = ["//visibility:public"],
+)
+
+# Build with --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+go_image(
+    name = "fetch2_image",
+    args = [
+        "--alsologtostderr",
+    ],
+    data = ["@com_github_anders617_mdining_proto//proto/sample:proto_sample_data"],
+    embed = [":fetch2_library"],
+    visibility = ["//visibility:public"],
+)
+
+# A common pattern when users want to avoid trampling
+# on each other's images during development.
+container_push(
+    name = "fetch2_image_publish",
+    format = "Docker",
+    image = ":fetch2_image",
+    # Any of these components may have variables.
+    registry = "gcr.io",
+    repository = "michigandiningapi/fetch2",
+    tag = "latest",
 )

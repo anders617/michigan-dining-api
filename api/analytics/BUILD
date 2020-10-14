@@ -8,5 +8,5 @@ go_library(
     deps = [
         "@com_github_golang_glog//:go_default_library",
         "@com_github_google_uuid//:go_default_library",
-    ]
+    ],
 )

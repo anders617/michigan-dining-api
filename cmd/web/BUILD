@@ -36,11 +36,11 @@ go_binary(
 # Build with --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 go_image(
     name = "web_image",
-    data = [
-        "//public:public_files",
-    ],
     args = [
         "--alsologtostderr",
+    ],
+    data = [
+        "//public:public_files",
     ],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
@@ -55,5 +55,5 @@ container_push(
     # Any of these components may have variables.
     registry = "gcr.io",
     repository = "michigandiningapi/web",
-    tag = "latest"
+    tag = "latest",
 )

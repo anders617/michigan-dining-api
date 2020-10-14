@@ -20,6 +20,15 @@ const (
 	DiningHallGroupName = "DINING HALLS"
 )
 
+// https://prod-dining-services.webplatformsunpublished.umich.edu/
+/**
+https://prod-dining-services.webplatformsunpublished.umich.edu/dining/menu?key=093665d6ab069c859267fd4001c3c562ba805539ed852978&location=Bursley%20Dining%20Hall&date=11-10-2020&meal=BREAKFAST
+https://prod-dining-services.webplatformsunpublished.umich.edu/dining/menu?key=093665d6ab069c859267fd4001c3c562ba805539ed852978&location=Bursley%20Dining%20Hall&date=11-10-2020&meal=BREAKFAST
+https://prod-dining-services.webplatformsunpublished.umich.edu/dining/locations?key=093665d6ab069c859267fd4001c3c562ba805539ed852978
+https://prod-dining-services.webplatformsunpublished.umich.edu/dining/meal-hours?key=093665d6ab069c859267fd4001c3c562ba805539ed852978&location=Java%20Blu%20At%20Sph&date=11-10-2020
+https://prod-dining-services.webplatformsunpublished.umich.edu/dining/capacity?key=093665d6ab069c859267fd4001c3c562ba805539ed852978
+
+*/
 var (
 	DiningHallListUrl            = urlFrom("https://mobile.its.umich.edu/michigan/services/dining/shallowDiningHallGroups")
 	DiningHallMenuBaseUrl        = urlFrom("https://mobile.its.umich.edu/michigan/services/dining/shallowMenusByDiningHall")

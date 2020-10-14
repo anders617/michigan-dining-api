@@ -10,5 +10,5 @@ go_library(
         "@com_github_anders617_mdining_proto//proto:mdining_go_proto",
         "@com_github_golang_glog//:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",
-    ]
+    ],
 )

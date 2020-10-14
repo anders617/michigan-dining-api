@@ -6,6 +6,7 @@ import (
 
 const MDiningDateLayout = "2006-01-02T15:04:05-07:00"
 const MDiningDateNoTimeLayout = "2006-01-02"
+const MDiningAPINoTimeLayout = "02-01-2006"
 
 var USEasternLocation, _ = time.LoadLocation("America/Detroit")
 
@@ -35,6 +36,10 @@ func DayEnd(t time.Time) time.Time {
 
 func FormatNoTime(t time.Time) string {
 	return t.In(USEasternLocation).Format(MDiningDateNoTimeLayout)
+}
+
+func FormatMDiningAPINoTime(t time.Time) string {
+	return t.In(USEasternLocation).Format(MDiningAPINoTimeLayout)
 }
 
 func fetchTimeOnDate(t time.Time) time.Time {

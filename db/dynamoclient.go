@@ -4,7 +4,6 @@ import (
 	"context"
 	"math"
 	"reflect"
-	"time"
 
 	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
@@ -148,6 +147,7 @@ func (d *DynamoClient) PutProtoBatch(table *string, protos []proto.Message) erro
 	}
 	numBatches := int(math.Ceil(float64(len(reqs)) / 25.0))
 	currentBatch := 0
+	problematicReqs := make([]dynamodb.WriteRequest, 0)
 	for len(reqs) > 0 {
 		// Take last 25 reqs (or all if <25 left)
 		// Dynamo db restricts batch calls to 25 or fewer items
@@ -161,13 +161,21 @@ func (d *DynamoClient) PutProtoBatch(table *string, protos []proto.Message) erro
 		_, err := req.Send(context.Background())
 		if err != nil {
 			glog.Errorf("Error batch putting %s %s", reflect.TypeOf(protos), err)
-			glog.Errorf("Retrying...")
-			time.Sleep(time.Second)
-			continue
+			problematicReqs = append(problematicReqs, reqs[startIdx:]...)
 		}
 		reqs = reqs[:startIdx]
 		glog.Infof("Batch Put %s (%d/%d): %d Items Remaining", *table, currentBatch, numBatches, len(reqs))
-		currentBatch += 1
+		currentBatch++
+	}
+	glog.Infof("Trying problematic requests individually (%d)", len(problematicReqs))
+	for _, probReq := range problematicReqs {
+		req := d.client.BatchWriteItemRequest(&dynamodb.BatchWriteItemInput{
+			RequestItems: map[string][]dynamodb.WriteRequest{
+				*table: []dynamodb.WriteRequest{probReq}}})
+		_, err := req.Send(context.Background())
+		if err != nil {
+			glog.Errorf("Error putting item %s", err)
+		}
 	}
 	glog.Infof("Successful Batch Put %s", reflect.TypeOf(protos))
 	return nil
