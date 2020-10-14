@@ -5,7 +5,7 @@ startup --batch
 test --ram_utilization_factor=10
 
 # Use a remote cache to speed up builds
-build --remote_cache=http://michigan-dining-api.bazel-cache.andersboberg.com:5555
+# build --remote_cache=http://michigan-dining-api.bazel-cache.andersboberg.com:5555
 
 # Write to cache to allow travis to do some caching
 build --disk_cache=/home/travis/bazel-cache
