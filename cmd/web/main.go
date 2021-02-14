@@ -138,6 +138,14 @@ func main() {
 			resp.Write(favicon)
 			return
 		}
+		if req.URL.Path == "/healthcheck" {
+			if mDiningServer.IsAvailable() {
+				resp.Write([]byte("OK"))
+				return
+			}
+			http.Error(resp, "Unavailable", http.StatusInternalServerError)
+			return
+		}
 		// Fall back to other servers.
 		mux.ServeHTTP(resp, req)
 	})

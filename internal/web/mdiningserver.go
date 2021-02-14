@@ -135,6 +135,18 @@ func (s *Server) fetchFoodStats(wg *sync.WaitGroup) {
 }
 
 //
+// Used for healthcheck to see if data is available.
+//
+func (s *Server) IsAvailable() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.diningHalls == nil {
+		return false
+	}
+	return true
+}
+
+//
 // Handler for GetDiningHalls request
 //
 func (s *Server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest) (*pb.DiningHallsReply, error) {
