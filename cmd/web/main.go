@@ -12,6 +12,7 @@ import (
 
 	"github.com/MichiganDiningAPI/api/analytics/analyticsclient"
 	"github.com/MichiganDiningAPI/internal/web/mdiningserver"
+	"github.com/MichiganDiningAPI/internal/web/ratelimiter"
 	pb "github.com/anders617/mdining-proto/proto/mdining"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -56,9 +57,7 @@ func allowCORS(h http.Handler) http.Handler {
 	})
 }
 
-//
 // Serves GRPC requests
-//
 func serveGRPC(port string, server *mdiningserver.Server) {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -124,6 +123,7 @@ func main() {
 	pb.RegisterMDiningServer(grpcServer, mDiningServer)
 	// Wrap it in a grpcweb handler in order to also serve grpc-web requests
 	wrappedGrpc := grpcweb.WrapServer(grpcServer, grpcweb.WithAllowedRequestHeaders([]string{"*"}))
+	menuRateLimiter := ratelimiter.New()
 	grpcWebHandler := http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
@@ -144,6 +144,10 @@ func main() {
 				return
 			}
 			http.Error(resp, "Unavailable", http.StatusInternalServerError)
+			return
+		}
+		if !menuRateLimiter.ShouldAllow(req) {
+			http.Error(resp, "Please do not abuse this API. Rate limit reached.", http.StatusInternalServerError)
 			return
 		}
 		// Fall back to other servers.

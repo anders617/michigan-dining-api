@@ -134,9 +134,7 @@ func (s *Server) fetchFoodStats(wg *sync.WaitGroup) {
 	glog.Infof("QueryFoodStats Success")
 }
 
-//
 // Used for healthcheck to see if data is available.
-//
 func (s *Server) IsAvailable() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -146,9 +144,7 @@ func (s *Server) IsAvailable() bool {
 	return true
 }
 
-//
 // Handler for GetDiningHalls request
-//
 func (s *Server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest) (*pb.DiningHallsReply, error) {
 	glog.Infof("GetDiningHalls req{%v}", req)
 	s.mu.RLock()
@@ -160,9 +156,7 @@ func (s *Server) GetDiningHalls(ctx context.Context, req *pb.DiningHallsRequest)
 	return &pb.DiningHallsReply{DiningHalls: s.diningHalls.DiningHalls}, nil
 }
 
-//
 // Handler for GetItems request
-//
 func (s *Server) GetItems(ctx context.Context, req *pb.ItemsRequest) (*pb.ItemsReply, error) {
 	glog.Infof("GetItems req{%v}", req)
 	s.mu.RLock()
