@@ -9,7 +9,7 @@ import (
 	"github.com/golang/glog"
 )
 
-const maxPerHour = 5
+const maxPerHour = 1
 
 func getIPFromRemoteAddr(remoteAddr string) string {
 	comps := strings.Split(remoteAddr, ":")
