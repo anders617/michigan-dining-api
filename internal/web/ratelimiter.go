@@ -41,10 +41,10 @@ func (r *RateLimiter) ShouldAllow(req *http.Request) bool {
 	hour := time.Now().Hour()
 	ip := getIPFromRemoteAddr(req.RemoteAddr)
 	r.mu.Lock()
-	rate, ok := r.rates[ip]
+	rate, ok := r.rates["default"]
 	if !ok || rate.hour != hour {
-		r.rates[ip] = &hourRate{hour, 0}
-		rate = r.rates[ip]
+		r.rates["default"] = &hourRate{hour, 0}
+		rate = r.rates["default"]
 	}
 	var requestRate = rate.count + 1
 	rate.count = requestRate
